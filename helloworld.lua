@@ -75,3 +75,67 @@ print(type(scores)) -- still a table
 
 print(scores.jelle) -- returns 10
 scores.jelle = nil
+
+-- this is just like enumerate() in python
+-- maybe this was the inspiration or maybe it
+-- already existed before lua
+-- however, we MUST use iterators, this is the 
+-- standard for loop even if we're not interested
+-- in the index or key of our table
+for _, number in ipairs(somenumbers) do
+    print(number)
+end
+
+-- From the docs;
+-- Tables are the sole data-structuring mechanism in Lua;
+-- they can be used to represent ordinary arrays, lists,
+--  symbol tables, sets, records, graphs, trees, etc. 
+-- To represent records, Lua uses the field name as an index.
+-- The language supports this representation by providing
+-- a.name as syntactic sugar for a["name"]. There are several
+-- convenient ways to create tables in Lua (see §3.4.9).
+
+-- A table in Lua is an object in more than one sense.
+-- Like objects, tables have a state. Like objects, 
+-- tables have an identity (a selfness) that is independent
+-- of their values; specifically, two objects (tables) with
+-- the same value are different objects, whereas an object
+-- can have different values at different times, but it is always
+-- the same object. Like objects, tables have a life cycle that 
+-- is independent of who created them or where they were created.
+
+-- tables also serve as objects in lua
+-- this is one of the syntaxes, you can also specify the 'self'
+-- argument explicitly but then you have to pass it every time
+-- you call the method which seems worse
+Account = {balance = 0}
+    function Account:withdraw (v)
+        self.balance = self.balance - v
+    end
+
+Account.balance = 50
+Account:withdraw(5)                 -- syntax 1
+Account.withdraw(Account, 5)        -- syntax 2
+print(Account.balance)
+
+-- and keeping with the theme of tables being everything,
+-- we can also make it serve as a class by giving it 
+-- a constructor
+MoveableObject = {xPos = 0, yPos = 0}
+    function MoveableObject:shoot (v)
+        print("pewpewpew")
+    end
+    function MoveableObject:new(o)
+      o = o or {}   -- create object if user does not provide one
+      setmetatable(o, self)  -- make o inherit functions from MoveableObject
+      self.__index = self  -- no idea what this does
+      return o
+    end
+
+player = MoveableObject:new({xPos = 10, yPos = 10})
+enemy = MoveableObject:new()
+
+player:shoot()
+print(player.xPos)
+print(player.yPos)
+enemy:shoot()
