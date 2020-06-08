@@ -1,39 +1,52 @@
+local gameobjects = {}
+
 function love.load()
-    number = 0
-    score = 0
+    local object = require('modules.object')
+
     images = {}
-    movingRight = true
-
-    myfont = love.graphics.newFont(40)
-
     images.tank = love.graphics.newImage("assets/images/tankframe.png")
+    images.tankgun = love.graphics.newImage("assets/images/tanktop.png")
+    
+    gameobjects[1] = object:new()
+    gameobjects[1].weapon_angle = 0.40
 end
 
 function love.mousepressed(x, y, button, istouch)
-   if movingRight then
-       movingRight = false
-   else
-       movingRight = true
-   end
 end
 
 function love.update(dt)
-    if movingRight then
-        number = number + (dt * 30)
-    else
-        number = number - (dt * 30)
-    end
+
+    local i = 1
+    
+    gameobjects[i]:rotate_right(0.02)
+
 end
 
 function love.draw()
     
-    love.graphics.draw(images.tank, 50, 50)
-    
-    -- love.graphics.setColor(0.5, 0.5, 1)
-    love.graphics.rectangle("fill", number, 20, 20, 20)
-    --  love.graphics.setColor(0.5, 1, 0.5)
-    love.graphics.circle("fill", 4, 4, 100)
+    local i = 1
 
-    love.graphics.setFont(myfont)
-    love.graphics.print(score, 700, 4)
+    -- love.graphics.draw(imageobject, x, y, rotation, somescaleparam, somescaleparam, originx, originy)
+    love.graphics.draw(
+        images.tank,
+        gameobjects[i].x,
+        gameobjects[i].y,
+        gameobjects[i].angle,
+        1,
+        1,
+        images.tank:getWidth() / 2,
+        images.tank:getHeight() / 2)
+    
+    if gameobjects[i]['weapon_angle'] ~= nil then
+        love.graphics.draw(
+            images.tankgun,
+            gameobjects[i].x,
+            gameobjects[i].y,
+            gameobjects[i].weapon_angle,
+            1,
+            1,
+            (images.tankgun:getWidth() / 2) - 30,
+            images.tankgun:getHeight() / 2)
+    end
+    
 end
