@@ -1,18 +1,21 @@
 object = {
-    x = 200,
-    y = 200,
-    x_velocity = 0.50,
-    y_velocity = 0.50,
-    can_move_while_rotating = false,
+    sprite_frame = 'tank',
+    sprite_top = 'tankgun',
+    x = 100,
+    y = 100,
+    width = 80,
+    height = 156,
+    x_velocity = 0,
+    y_velocity = 0,
+    max_speed_while_rotating = 0.15,
     angle = 0.5,
-    angle2 = 0.6
+    angle2 = 0.6,
+    max_speed = 0.4,
+    max_reverse_speed = 0.1,
+    accel_speed = 0.01,
+    reverse_accel_speed = 0.005,
+    size_modifier = 1
 }
-
--- allGameObjects[iPlayer].xVelocity += Math.sin(allGameObjects[iPlayer].angle) * 0.2;
--- if (allGameObjects[iPlayer].xVelocity > 1) {allGameObjects[iPlayer].xVelocity = 1};
--- allGameObjects[iPlayer].yVelocity += -Math.cos(allGameObjects[iPlayer].angle) * 0.2;
--- if (allGameObjects[iPlayer].yVelocity > 0.7) {allGameObjects[iPlayer].yVelocity = 0.7};
-
 
 function object.fix_radians_bounds(self, angle_property_name)
 
@@ -49,7 +52,7 @@ end
 
 function object.accelerate(self, increment)
 
-    increment = increment or 0.03
+    increment = increment or self.accel_speed
     
     self.x_velocity = self.x_velocity + (math.sin(self.angle) * increment)
     self.y_velocity = self.y_velocity - (math.cos(self.angle) * increment)
@@ -81,6 +84,15 @@ function object.decelerate(self, increment)
             self.y_velocity + increment,
             0)
     end
+
+end
+
+function object.reverse(self, increment)
+
+    increment = increment or self.reverse_accel_speed
+    
+    self.x_velocity = self.x_velocity - (math.sin(self.angle) * increment)
+    self.y_velocity = self.y_velocity + (math.cos(self.angle) * increment)
 
 end
 
