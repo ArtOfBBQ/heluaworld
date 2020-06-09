@@ -3,18 +3,20 @@ object = {
     sprite_top = 'tankgun',
     x = 100,
     y = 100,
-    width = 80,
-    height = 156,
+    width = 80, -- 80 at size_modifier = 1, will be downsized in new()
+    height = 156, -- 156 at size_modifier = 1, will be downsized in new()
     x_velocity = 0,
     y_velocity = 0,
-    max_speed_while_rotating = 0.15,
-    angle = 0.5,
+    max_speed_while_rotating = 0.75,
+    angle = 2,
     angle2 = 0.6,
-    max_speed = 0.4,
-    max_reverse_speed = 0.1,
-    accel_speed = 0.01,
-    reverse_accel_speed = 0.005,
-    size_modifier = 1
+    max_speed = 20,
+    max_reverse_speed = 5,
+    accel_speed = 0.25,
+    decel_speed = 0.125,
+    reverse_accel_speed = 0.125,
+    rotation_speed = 0.75,
+    size_modifier = 0.1666
 }
 
 function object.fix_radians_bounds(self, angle_property_name)
@@ -26,9 +28,9 @@ function object.fix_radians_bounds(self, angle_property_name)
 
 end
 
-function object.rotate_left(self, increment)
+function object.rotate_left(self, elapsed)
     
-    increment = increment or 0.005
+    local increment = self.rotation_speed * elapsed
 
     self.angle = self.angle - increment
     if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
@@ -38,9 +40,9 @@ function object.rotate_left(self, increment)
 
 end
 
-function object.rotate_right(self, increment)
+function object.rotate_right(self, elapsed)
     
-    increment = increment or 0.005
+    local increment = self.rotation_speed * elapsed
 
     self.angle = self.angle + increment
     if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
@@ -50,18 +52,18 @@ function object.rotate_right(self, increment)
 
 end
 
-function object.accelerate(self, increment)
+function object.accelerate(self, elapsed)
 
-    increment = increment or self.accel_speed
+    local increment = self.accel_speed * elapsed
     
     self.x_velocity = self.x_velocity + (math.sin(self.angle) * increment)
     self.y_velocity = self.y_velocity - (math.cos(self.angle) * increment)
 
 end
 
-function object.decelerate(self, increment)
+function object.decelerate(self, elapsed)
 
-    increment = increment or 0.02
+    local increment = self.decel_speed * elapsed
     
     if self.x_velocity > 0 then
         self.x_velocity = math.max(
@@ -87,9 +89,9 @@ function object.decelerate(self, increment)
 
 end
 
-function object.reverse(self, increment)
+function object.reverse(self, elapsed)
 
-    increment = increment or self.reverse_accel_speed
+    local increment = self.reverse_accel_speed * elapsed
     
     self.x_velocity = self.x_velocity - (math.sin(self.angle) * increment)
     self.y_velocity = self.y_velocity + (math.cos(self.angle) * increment)
@@ -102,6 +104,10 @@ function object:new(o)
 
     setmetatable(o, self)
     self.__index = self
+
+    o.width = o.width * o.size_modifier
+    o.height = o.height * o.size_modifier
+
     return o
 end
 

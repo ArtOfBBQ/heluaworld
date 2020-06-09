@@ -1,11 +1,21 @@
 local gameobjects = {}
+local elapsed
+local previous_time
 
 local pressingup = false
 local pressingdown = false
 local pressingright = false
 local pressingleft = false
 
+local screen_width = 1200
+local screen_height = 1000
+local previous_time = os.clock()
+
 function love.load()
+
+    love.window.setMode(screen_width, screen_height, {resizable=false, vsync=false, minwidth=400, minheight=300})
+    love.window.setTitle('Macro & Conquer')
+
     local object = require('modules.object')
     local helper = require('modules.helper')
 
@@ -22,16 +32,15 @@ function love.load()
     gameobjects[2].angle = 0
     gameobjects[2].weapon_angle = gameobjects[2].angle
 
+    previous_time = os.clock()
+
 end
 
 function love.keypressed( key, scancode, isrepeat )
 
     if key == 'up' then pressingup = true end
-
     if key == 'down' then pressingdown = true end
-
     if key == 'right' then pressingright = true end
-
     if key == 'left' then pressingleft = true end
 
 end
@@ -39,11 +48,8 @@ end
 function love.keyreleased( key, scancode, isrepeat )
 
     if key == 'up' then pressingup = false end
-
     if key == 'down' then pressingdown = false end
-
     if key == 'right' then pressingright = false end
-
     if key == 'left' then pressingleft = false end
 
 end
@@ -57,26 +63,29 @@ end
 
 function love.update(dt)
 
+    elapsed = os.clock() - previous_time
+    previous_time = os.clock()
+
     if pressingright 
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-    then gameobjects[1]:rotate_right() end
+    then gameobjects[1]:rotate_right(elapsed) end
 
     if pressingleft
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-    then gameobjects[1]:rotate_left() end
+    then gameobjects[1]:rotate_left(elapsed) end
 
-    if pressingup then gameobjects[1]:accelerate() end
+    if pressingup then gameobjects[1]:accelerate(elapsed) end
 
-    if pressingdown then gameobjects[1]:reverse() end
+    if pressingdown then gameobjects[1]:reverse(elapsed) end
     
     gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
     gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
 
     -- decelerate naturally
     for i = 1, #gameobjects, 1 do
-        gameobjects[i]:decelerate(0.003)
+        gameobjects[i]:decelerate(elapsed)
     end
 
 end
@@ -144,13 +153,15 @@ function love.draw()
             2)
         
         
-        love.graphics.print("x velocity: " .. math.floor(gameobjects[i].x_velocity, 3), 625, 50)
-        love.graphics.print("y velocity: " .. math.floor(gameobjects[i].y_velocity, 3), 625, 70)
-        love.graphics.print("angle: " .. math.floor(gameobjects[i].angle, 4), 625, 90)
-        love.graphics.print("x (center): " .. math.floor(gameobjects[i].x), 625, 110)
-        love.graphics.print("x (edge 1): " .. math.floor(rotated_x), 625, 130)
-        love.graphics.print("y (center): " .. math.floor(gameobjects[i].y), 625, 150)
-        love.graphics.print("y (edge 1): " .. math.floor(rotated_y), 625, 170)
+        love.graphics.print("x velocity: " .. math.floor(gameobjects[1].x_velocity * 100)/100, screen_width - 150, 50)
+        love.graphics.print("y velocity: " .. math.floor(gameobjects[1].y_velocity * 100)/100, screen_width - 150, 70)
+        love.graphics.print("angle: " .. math.floor(gameobjects[1].angle + 10) / 10, screen_width - 150, 90)
+        love.window.setTitle(gameobjects[1].angle)
+        love.graphics.print("x (center): " .. math.floor(gameobjects[1].x), screen_width - 150, 110)
+        love.graphics.print("x (edge 1): " .. math.floor(rotated_x), screen_width - 150, 130)
+        love.graphics.print("y (center): " .. math.floor(gameobjects[1].y), screen_width - 150, 150)
+        love.graphics.print("y (edge 1): " .. math.floor(rotated_y), screen_width - 150, 170)
+        love.graphics.print("elapsed: " .. elapsed, screen_width - 150, 190)
         -- end of debugging code
 
     end
