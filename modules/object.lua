@@ -96,6 +96,17 @@ function object.reverse(self, elapsed)
 
 end
 
+function object.adjust_size(self, new_size_modifier)
+
+    local orig_width = (1/self.size_modifier) * self.width
+    local orig_height = (1/self.size_modifier) * self.height
+
+    self.width = new_size_modifier * orig_width
+    self.height = new_size_modifier * orig_height
+    self.size_modifier = new_size_modifier
+
+end
+
 function object:new(o)
 
     o = o or {}
@@ -129,7 +140,7 @@ function object:newtank()
 end
 
 
-local tree_images = {'tree1', 'tree2'}
+local tree_images = {'tree1', 'tree2', 'tree3', 'tree4', 'tree5', 'tree6', 'tree7', 'tree8', 'tree9'}
 
 function object:newtree(x, y)
 
