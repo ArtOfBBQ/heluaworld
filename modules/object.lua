@@ -12,8 +12,8 @@ object = {
     angle2 = 0.6,
     max_speed = 20,
     max_reverse_speed = 5,
-    accel_speed = 0.25,
-    decel_speed = 0.125,
+    accel_speed = 0.125,
+    decel_speed = 0.1,
     reverse_accel_speed = 0.125,
     rotation_speed = 0.75,
     size_modifier = 0.1666
@@ -64,29 +64,27 @@ end
 function object.decelerate(self, elapsed)
 
     local increment = self.decel_speed * elapsed
+    local total_speed = math.abs(self.x_velocity) + math.abs(self.y_velocity)
     
     if self.x_velocity > 0 then
         self.x_velocity = math.max(
-            -- self.x_velocity - (math.sin(self.angle) * increment),
-            self.x_velocity - increment,
+            self.x_velocity - math.abs((self.x_velocity / total_speed) * increment),
             0)
     else
         self.x_velocity = math.min(
-            -- self.x_velocity - (math.sin(self.angle) * increment),
-            self.x_velocity + increment,
+            self.x_velocity + math.abs((self.x_velocity / total_speed) * increment),
             0)
     end
     
     if self.y_velocity > 0 then
         self.y_velocity = math.max(
-            self.y_velocity - increment,
+            self.y_velocity - math.abs((self.y_velocity / total_speed) * increment),
             0)
     else
         self.y_velocity = math.min(
-            self.y_velocity + increment,
+            self.y_velocity + math.abs((self.y_velocity / total_speed) * increment),
             0)
     end
-
 end
 
 function object.reverse(self, elapsed)
