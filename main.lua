@@ -16,18 +16,19 @@ local pressingd = false
 local previous_time = os.clock()
 local debug_mode = false
 
-local camera = {width = 1200, height = 1000, left = 0, top = 0, speed = 200}
 local map = {width = 20000, height = 20000}
 
 
 function love.load()
 
-    love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
-    love.window.setTitle('Macro & Conquer')
 
     local object = require('modules.object')
     local helper = require('modules.helper')
     local images = require('modules.imagefilenames')
+    local camera = require('modules.camera')
+
+    love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
+    love.window.setTitle('Macro & Conquer')
     
     gameobjects[1] = object:newtank()
     assert(gameobjects[1].sprite_frame == 'tank')
@@ -35,11 +36,11 @@ function love.load()
     gameobjects[1].weapon_angle = gameobjects[1].angle + 0.4
 
     gameobjects[2] = object:newtree(70, 400)
-    gameobjects[3] = object:newtree(80, 410)
-    gameobjects[4] = object:newtree(95, 385)
-    gameobjects[5] = object:newtree(50, 425)
-    gameobjects[6] = object:newtree(115, 370)
-    gameobjects[7] = object:newtree(135, 400)
+    gameobjects[3] = object:newtree(80, 440)
+    gameobjects[4] = object:newtree(95, 285)
+    gameobjects[5] = object:newtree(50, 525)
+    gameobjects[6] = object:newtree(115, 320)
+    gameobjects[7] = object:newtree(335, 700)
 
     previous_time = os.clock()
 
@@ -88,19 +89,13 @@ function love.update(dt)
     previous_time = os.clock()
 
     if pressingp then
-
-        -- zoom in
-        -- for i = 1, #gameobjects, 1 do
-            -- gameobjects[i]:adjust_size(gameobjects[i].size_modifier + (0.1 * elapsed))
-        -- end
+        camera.zoom = camera.zoom + (1 * elapsed)
     end
-
     if pressingo then
-        -- zoom out
-        for i = 1, #gameobjects, 1 do
-            gameobjects[i]:adjust_size(gameobjects[i].size_modifier - (0.1 * elapsed))
-        end
+        camera.zoom = camera.zoom - (1 * elapsed)
     end
+    camera.cur_width = camera.width * camera.zoom
+    camera.cur_height = camera.height * camera.zoom
 
     if pressingd then camera.left = camera.left + (camera.speed * elapsed) end
     if pressinga then camera.left = camera.left - (camera.speed * elapsed) end
@@ -140,60 +135,97 @@ function love.draw()
         assert(images[gameobjects[i].sprite_frame] ~= nil)
         love.graphics.draw(
             images[gameobjects[i].sprite_frame],
-            gameobjects[i].x - camera.left,
-            gameobjects[i].y - camera.top,
+            camera.x_world_to_screen(gameobjects[i].x),
+            camera.y_world_to_screen(gameobjects[i].y),
             gameobjects[i].angle,
-            gameobjects[i].size_modifier,
-            gameobjects[i].size_modifier,
-            images.tank:getWidth() / 2,
-            images.tank:getHeight() / 2)
+            gameobjects[i].size_modifier * camera.zoom,
+            gameobjects[i].size_modifier * camera.zoom,
+            images[gameobjects[i].sprite_frame]:getWidth() / 2,
+            images[gameobjects[i].sprite_frame]:getHeight() / 2)
         
         if gameobjects[i]['weapon_angle'] ~= nil then
             love.graphics.draw(
                 images[gameobjects[i].sprite_top],
-                gameobjects[i].x - camera.left,
-                gameobjects[i].y - camera.top,
+                camera.x_world_to_screen(gameobjects[i].x),
+                camera.y_world_to_screen(gameobjects[i].y),
                 gameobjects[i].weapon_angle,
-                gameobjects[i].size_modifier,
-                gameobjects[i].size_modifier,
-                (images.tankgun:getWidth() / 2),
-                (images.tankgun:getHeight() / 2) + 30)
+                gameobjects[i].size_modifier * camera.zoom,
+                gameobjects[i].size_modifier * camera.zoom,
+                images[gameobjects[i].sprite_top]:getWidth() / 2,
+                (images[gameobjects[i].sprite_top]:getHeight() / 2) + 30)
         end
         
         -- for debugging only, draw little circles to outline the object
-        -- -- top left of object
         if debug_mode then
-            local rotated_x = gameobjects[i].x + helper.rotate_x_coord(-gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
-            local rotated_y = gameobjects[i].y + helper.rotate_y_coord(-gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
+            -- top left of object
+            local rotated_x = camera.x_world_to_screen(
+                gameobjects[i].x + helper.rotate_x_coord(
+                    (-gameobjects[i].width / 2),
+                    (-gameobjects[i].height / 2),
+                    gameobjects[i].angle))
+            local rotated_y = camera.y_world_to_screen(
+                gameobjects[i].y + helper.rotate_y_coord(
+                    (-gameobjects[i].width / 2),
+                    (-gameobjects[i].height / 2),
+                    gameobjects[i].angle))
             love.graphics.circle(
                 "fill",
-                rotated_x - camera.left,
-                rotated_y - camera.top,
+                rotated_x,
+                rotated_y,
                 2)
-            love.graphics.circle("fill", gameobjects[i].x - camera.left, gameobjects[i].y - camera.top, 2)
-            -- top right of object
-            rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
-            rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
+            -- center of object
             love.graphics.circle(
                 "fill",
-                rotated_x - camera.left,
-                rotated_y - camera.top,
+                camera.x_world_to_screen(gameobjects[i].x),
+                camera.y_world_to_screen(gameobjects[i].y),
+                2)
+            -- top right of object
+            rotated_x = camera.x_world_to_screen(
+                gameobjects[i].x + helper.rotate_x_coord(
+                    (gameobjects[i].width / 2),
+                    (-gameobjects[i].height / 2),
+                    gameobjects[i].angle))
+            rotated_y = camera.y_world_to_screen(
+                gameobjects[i].y + helper.rotate_y_coord(
+                    (gameobjects[i].width / 2),
+                    (-gameobjects[i].height / 2),
+                    gameobjects[i].angle))
+            love.graphics.circle(
+                "fill",
+                rotated_x,
+                rotated_y,
                 2)
             -- bottom right of object
-            rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-            rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+            rotated_x = camera.x_world_to_screen(
+                gameobjects[i].x + helper.rotate_x_coord(
+                    (gameobjects[i].width / 2),
+                    (gameobjects[i].height / 2),
+                    gameobjects[i].angle))
+            rotated_y = camera.y_world_to_screen(
+                gameobjects[i].y + helper.rotate_y_coord(
+                    (gameobjects[i].width / 2),
+                    (gameobjects[i].height / 2),
+                    gameobjects[i].angle))
             love.graphics.circle(
                 "fill",
-                rotated_x - camera.left,
-                rotated_y - camera.top,
+                rotated_x,
+                rotated_y,
                 2)
             -- bottom left of object
-            rotated_x = gameobjects[i].x + helper.rotate_x_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-            rotated_y = gameobjects[i].y + helper.rotate_y_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+            rotated_x = camera.x_world_to_screen(
+                gameobjects[i].x + helper.rotate_x_coord(
+                    (-gameobjects[i].width / 2),
+                    (gameobjects[i].height / 2),
+                    gameobjects[i].angle))
+            rotated_y = camera.y_world_to_screen(
+                gameobjects[i].y + helper.rotate_y_coord(
+                    (-gameobjects[i].width / 2),
+                    (gameobjects[i].height / 2),
+                    gameobjects[i].angle))
             love.graphics.circle(
                 "fill",
-                rotated_x - camera.left,
-                rotated_y - camera.top,
+                rotated_x,
+                rotated_y,
                 2)
         end
         

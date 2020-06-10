@@ -3,8 +3,8 @@ object = {
     sprite_top = nil,
     x = 100,
     y = 100,
-    width = 80, -- 80 at size_modifier = 1, will be downsized in new()
-    height = 156, -- 156 at size_modifier = 1, will be downsized in new()
+    width = 10,
+    height = 10, -- 156 at size_modifier = 1, will be downsized in new()
     x_velocity = 0,
     y_velocity = 0,
     max_speed_while_rotating = 0.75,
@@ -155,10 +155,10 @@ function object:newtree(x, y)
     o.accel_speed = 0
     o.decel_speed = 0
     o.angle = math.random() * 6.28
-    o.size_modifier = 0.25 * (2.5 + math.random()) / 3
+    o.size_modifier = 0.33 * ((1 + math.random()) / 1.5)
 
-    o.width = 72 * o.size_modifier
-    o.height = 72 * o.size_modifier
+    o.width = 128 * o.size_modifier
+    o.height = 128 * o.size_modifier
 
     return o
 end
