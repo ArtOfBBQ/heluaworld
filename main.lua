@@ -22,16 +22,19 @@ function love.load()
     images = {}
     images.tank = love.graphics.newImage("assets/images/tankframe.png")
     images.tankgun = love.graphics.newImage("assets/images/tanktop.png")
+    images.tree1 = love.graphics.newImage("assets/images/terrain/tree1.png")
+    images.tree2 = love.graphics.newImage("assets/images/terrain/tree2.png")
+    assert(images.tree2 ~= nil)
     
-    gameobjects[1] = object:new()
-    gameobjects[1].weapon_angle = gameobjects[1].angle
+    gameobjects[1] = object:newtank()
+    assert(gameobjects[1].sprite_frame == 'tank')
+    assert(gameobjects[1].sprite_top == 'tankgun')
+    gameobjects[1].weapon_angle = gameobjects[1].angle + 0.4
 
-    gameobjects[2] = object:new()
-    gameobjects[2].x = 70
-    gameobjects[2].y = 400
-    gameobjects[2].angle = 0
-    gameobjects[2].weapon_angle = gameobjects[2].angle
-
+    gameobjects[2] = object:newtree(70, 400)
+    gameobjects[3] = object:newtree(80, 410)
+    gameobjects[4] = object:newtree(95, 385)
+    
     previous_time = os.clock()
 
 end
@@ -95,6 +98,8 @@ function love.draw()
     for i = 1, #gameobjects, 1 do
 
         -- love.graphics.draw(imageobject, x, y, rotation, somescaleparam, somescaleparam, originx, originy)
+        assert(gameobjects[i].sprite_frame ~= nil)
+        assert(images[gameobjects[i].sprite_frame] ~= nil)
         love.graphics.draw(
             images[gameobjects[i].sprite_frame],
             gameobjects[i].x,
@@ -118,39 +123,39 @@ function love.draw()
         end
         
         -- for debugging only, draw little circles to outline the object
-        -- top left of object
+        -- -- top left of object
         local rotated_x = gameobjects[i].x + helper.rotate_x_coord(-gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
         local rotated_y = gameobjects[i].y + helper.rotate_y_coord(-gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
-        love.graphics.circle(
-            "fill",
-            rotated_x,
-            rotated_y,
-            2)
-        love.graphics.circle("fill", gameobjects[i].x, gameobjects[i].y, 2)
-        -- top right of object
-        rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
-        rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
-        love.graphics.circle(
-            "fill",
-            rotated_x,
-            rotated_y,
-            2)
-        -- bottom right of object
-        rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-        rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-        love.graphics.circle(
-            "fill",
-            rotated_x,
-            rotated_y,
-            2)
-        -- bottom left of object
-        rotated_x = gameobjects[i].x + helper.rotate_x_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-        rotated_y = gameobjects[i].y + helper.rotate_y_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
-        love.graphics.circle(
-            "fill",
-            rotated_x,
-            rotated_y,
-            2)
+        -- love.graphics.circle(
+        --     "fill",
+        --     rotated_x,
+        --     rotated_y,
+        --     2)
+        -- love.graphics.circle("fill", gameobjects[i].x, gameobjects[i].y, 2)
+        -- -- top right of object
+        -- rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
+        -- rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, -gameobjects[i].height / 2, gameobjects[i].angle)
+        -- love.graphics.circle(
+        --     "fill",
+        --     rotated_x,
+        --     rotated_y,
+        --     2)
+        -- -- bottom right of object
+        -- rotated_x = gameobjects[i].x + helper.rotate_x_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+        -- rotated_y = gameobjects[i].y + helper.rotate_y_coord(gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+        -- love.graphics.circle(
+        --     "fill",
+        --     rotated_x,
+        --     rotated_y,
+        --     2)
+        -- -- bottom left of object
+        -- rotated_x = gameobjects[i].x + helper.rotate_x_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+        -- rotated_y = gameobjects[i].y + helper.rotate_y_coord(-gameobjects[i].width / 2, gameobjects[i].height / 2, gameobjects[i].angle)
+        -- love.graphics.circle(
+        --     "fill",
+        --     rotated_x,
+        --     rotated_y,
+        --     2)
         
         
         love.graphics.print("x velocity: " .. math.floor(gameobjects[1].x_velocity * 100)/100, screen_width - 150, 50)

@@ -1,6 +1,6 @@
 object = {
-    sprite_frame = 'tank',
-    sprite_top = 'tankgun',
+    sprite_frame = nil,
+    sprite_top = nil,
     x = 100,
     y = 100,
     width = 80, -- 80 at size_modifier = 1, will be downsized in new()
@@ -9,14 +9,14 @@ object = {
     y_velocity = 0,
     max_speed_while_rotating = 0.75,
     angle = 2,
-    angle2 = 0.6,
+    weapon_angle = nil,
     max_speed = 20,
     max_reverse_speed = 5,
     accel_speed = 0.125,
     decel_speed = 0.1,
     reverse_accel_speed = 0.125,
     rotation_speed = 0.75,
-    size_modifier = 0.1666
+    size_modifier = 1
 }
 
 function object.fix_radians_bounds(self, angle_property_name)
@@ -75,7 +75,7 @@ function object.decelerate(self, elapsed)
             self.x_velocity + math.abs((self.x_velocity / total_speed) * increment),
             0)
     end
-    
+
     if self.y_velocity > 0 then
         self.y_velocity = math.max(
             self.y_velocity - math.abs((self.y_velocity / total_speed) * increment),
@@ -105,6 +105,49 @@ function object:new(o)
 
     o.width = o.width * o.size_modifier
     o.height = o.height * o.size_modifier
+
+    return o
+end
+
+function object:newtank()
+
+    o = object:new()
+
+    o.sprite_frame = 'tank'
+    o.sprite_top = 'tankgun'
+    o.max_speed = 20
+    o.max_reverse_speed = 5
+    o.accel_speed = 0.125
+    o.decel_speed = 0.1
+    o.weapon_angle = 0.3
+    o.size_modifier = 0.25
+
+    o.width = 80 * o.size_modifier
+    o.height = 156 * o.size_modifier
+
+    return o
+end
+
+
+local tree_images = {'tree1', 'tree2'}
+
+function object:newtree(x, y)
+
+    o = object:new()
+
+    o.x = x
+    o.y = y
+    o.sprite_frame = tree_images[ math.random( #tree_images ) ]
+    o.sprite_top = nil
+    o.max_speed = 0
+    o.max_reverse_speed = 0
+    o.accel_speed = 0
+    o.decel_speed = 0
+    o.angle = math.random() * 6.28
+    o.size_modifier = 0.25 * (2.5 + math.random()) / 3
+
+    o.width = 72 * o.size_modifier
+    o.height = 72 * o.size_modifier
 
     return o
 end
