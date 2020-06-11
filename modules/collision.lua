@@ -71,44 +71,44 @@ function collision.update_all_collisions(gameobjects)
             else
 
                 if collision.point_collides_object_noangle(
-                        gameobjects[i].x + collision.rotate_x_coord(
-                            gameobjects[i].bottomleft_x - gameobjects[i].x,
-                            gameobjects[i].bottomleft_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
-                        gameobjects[i].y + collision.rotate_y_coord(
-                            gameobjects[i].bottomleft_x - gameobjects[i].x,
-                            gameobjects[i].bottomleft_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
+                        gameobjects[j].x + collision.rotate_x_coord(
+                            gameobjects[j].x - gameobjects[i].bottomleft_x,
+                            gameobjects[j].y - gameobjects[i].bottomleft_y,
+                            gameobjects[j].angle),
+                        gameobjects[j].y + collision.rotate_y_coord(
+                            gameobjects[j].x - gameobjects[i].bottomleft_x,
+                            gameobjects[j].y - gameobjects[i].bottomleft_y,
+                            gameobjects[j].angle),
                         gameobjects[j])
                     or collision.point_collides_object_noangle(
-                        gameobjects[i].x + collision.rotate_x_coord(
-                            gameobjects[i].topleft_x - gameobjects[i].x,
-                            gameobjects[i].topleft_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
-                        gameobjects[i].y + collision.rotate_y_coord(
-                            gameobjects[i].topleft_x - gameobjects[i].x,
-                            gameobjects[i].topleft_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
+                        gameobjects[j].x + collision.rotate_x_coord(
+                            gameobjects[j].x - gameobjects[i].topleft_x,
+                            gameobjects[j].y - gameobjects[i].topleft_y,
+                            gameobjects[j].angle),
+                        gameobjects[j].y + collision.rotate_y_coord(
+                            gameobjects[j].x - gameobjects[i].topleft_x,
+                            gameobjects[j].y - gameobjects[i].topleft_y,
+                            gameobjects[j].angle),
                         gameobjects[j])
                     or collision.point_collides_object_noangle(
-                        gameobjects[i].x + collision.rotate_x_coord(
-                            gameobjects[i].topright_x - gameobjects[i].x,
-                            gameobjects[i].topright_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
-                        gameobjects[i].y + collision.rotate_y_coord(
-                            gameobjects[i].topright_x - gameobjects[i].x,
-                            gameobjects[i].topright_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
+                        gameobjects[j].x + collision.rotate_x_coord(
+                            gameobjects[j].x - gameobjects[i].topright_x,
+                            gameobjects[j].y - gameobjects[i].topright_y,
+                            gameobjects[j].angle),
+                        gameobjects[j].y + collision.rotate_y_coord(
+                            gameobjects[j].x - gameobjects[i].topright_x,
+                            gameobjects[j].y - gameobjects[i].topright_y,
+                            gameobjects[j].angle),
                         gameobjects[j])
                     or collision.point_collides_object_noangle(
-                        gameobjects[i].x + collision.rotate_x_coord(
-                            gameobjects[i].bottomright_x - gameobjects[i].x,
-                            gameobjects[i].bottomright_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
-                        gameobjects[i].y + collision.rotate_y_coord(
-                            gameobjects[i].bottomright_x - gameobjects[i].x,
-                            gameobjects[i].bottomright_y - gameobjects[i].y,
-                            -gameobjects[j].angle),
+                        gameobjects[j].x + collision.rotate_x_coord(
+                            gameobjects[j].x - gameobjects[i].bottomright_x,
+                            gameobjects[j].y - gameobjects[i].bottomright_y,
+                            gameobjects[j].angle),
+                        gameobjects[j].y + collision.rotate_y_coord(
+                            gameobjects[j].x - gameobjects[i].bottomright_x,
+                            gameobjects[j].y - gameobjects[i].bottomright_y,
+                            gameobjects[j].angle),
                         gameobjects[j])
                 then
                     gameobjects[i].colliding = true

@@ -23,9 +23,8 @@ function love.load()
     assert(gameobjects[1].sprite_top == 'tankgun')
     gameobjects[1].weapon_angle = gameobjects[1].angle + 0.4
 
-    gameobjects[2] = object:newtree(300, 300)
-    gameobjects[2].angle = 0
-    gameobjects[2].angle = 0.35
+    gameobjects[2] = object:newtank(300, 100)
+    gameobjects[2].angle = 0.15
     
     previous_time = os.clock()
 
@@ -93,6 +92,7 @@ function love.update(dt)
     
     gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
     gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
+    gameobjects[2].angle = gameobjects[2].angle + 0.001
 
     -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
@@ -205,8 +205,12 @@ function love.draw()
                 camera.y_world_to_screen(gameobjects[i].bottomleft_y),
                 2)
         end
-        
-        love.graphics.print("x velocity: " .. math.floor(gameobjects[1].x_velocity * 100)/100, camera.width - 135, 50)
+        -- end of debugging code
+
+    end
+    
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("x velocity: " .. math.floor(gameobjects[1].x_velocity * 100)/100, camera.width - 135, 50)
         love.graphics.print("y velocity: " .. math.floor(gameobjects[1].y_velocity * 100)/100, camera.width - 135, 70)
         love.graphics.print("angle: " .. math.floor(gameobjects[1].angle * 100) / 100, camera.width - 135, 90)
         love.window.setTitle(gameobjects[1].angle)
@@ -220,9 +224,5 @@ function love.draw()
         love.graphics.print("camera top: " .. camera.top, camera.width - 135, 250)
         love.graphics.print("last key: " .. keyboard.lastkeypressed, camera.width - 135, 270)
         love.graphics.print("player colliding: " .. tostring(gameobjects[1].colliding), camera.width - 135, 290)
-
-        -- end of debugging code
-
-    end
     
 end

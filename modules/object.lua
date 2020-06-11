@@ -149,10 +149,12 @@ function object:new(o)
     return o
 end
 
-function object:newtank()
+function object:newtank(x, y)
 
     o = object:new()
 
+    o.x = x
+    o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
     o.max_speed = 20
