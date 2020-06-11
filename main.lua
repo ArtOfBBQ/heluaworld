@@ -1,18 +1,5 @@
 local gameobjects = {}
 local elapsed
-local previous_time
-
-local pressingup = false
-local pressingdown = false
-local pressingright = false
-local pressingleft = false
-local pressingp = false
-local pressingo = false
-local pressingw = false
-local pressings = false
-local pressinga = false
-local pressingd = false
-
 local previous_time = os.clock()
 local debug_mode = false
 
@@ -26,6 +13,7 @@ function love.load()
     local helper = require('modules.helper')
     local images = require('modules.imagefilenames')
     local camera = require('modules.camera')
+    local keyboard = require('modules.keyboard')
 
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
     love.window.setTitle('Macro & Conquer')
@@ -48,35 +36,14 @@ end
 
 function love.keypressed( key, scancode, isrepeat )
 
-    if key == 'up' then pressingup = true end
-    if key == 'down' then pressingdown = true end
-    if key == 'right' then pressingright = true end
-    if key == 'left' then pressingleft = true end
-    if key == 'p' then pressingp = true end
-    if key == 'o' then pressingo = true end
-    if key == 'w' then pressingw = true end
-    if key == 'd' then pressingd = true end
-    if key == 'a' then pressinga = true end
-    if key == 's' then pressings = true end
-    if key == '_' then pressingunderscore = true end
-    if key == '/' then pressingslash = true end
+    keyboard.lastkeypressed = key
+    keyboard['pressing' .. key] = true
 
 end
 
 function love.keyreleased( key, scancode, isrepeat )
 
-    if key == 'up' then pressingup = false end
-    if key == 'down' then pressingdown = false end
-    if key == 'right' then pressingright = false end
-    if key == 'left' then pressingleft = false end
-    if key == 'p' then pressingp = false end
-    if key == 'o' then pressingo = false end
-    if key == 'w' then pressingw = false end
-    if key == 'd' then pressingd = false end
-    if key == 'a' then pressinga = false end
-    if key == 's' then pressings = false end
-    if key == '_' then pressingunderscore = false end
-    if key == '/' then pressingslash = false end
+    keyboard['pressing' .. key] = false
 
 end
 
@@ -92,37 +59,37 @@ function love.update(dt)
     elapsed = os.clock() - previous_time
     previous_time = os.clock()
 
-    if pressingp then
+    if keyboard.pressingp then
         camera.zoom = camera.zoom + (camera.zoomspeed * elapsed)
     end
-    if pressingo then
+    if keyboard.pressingo then
         camera.zoom = camera.zoom - (camera.zoomspeed * elapsed)
     end
     camera.cur_width = camera.width * camera.zoom
     camera.cur_height = camera.height * camera.zoom
 
-    if pressingd then camera.left = camera.left + (camera.speed * elapsed) end
-    if pressinga then camera.left = camera.left - (camera.speed * elapsed) end
-    if pressingw then camera.top = camera.top - (camera.speed * elapsed) end
-    if pressings then camera.top = camera.top + (camera.speed * elapsed) end
+    if keyboard.pressingd then camera.left = camera.left + (camera.speed * elapsed) end
+    if keyboard.pressinga then camera.left = camera.left - (camera.speed * elapsed) end
+    if keyboard.pressingw then camera.top = camera.top - (camera.speed * elapsed) end
+    if keyboard.pressings then camera.top = camera.top + (camera.speed * elapsed) end
 
-    if pressingright
+    if keyboard.pressingright
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
     then gameobjects[1]:rotate_right(elapsed) end
 
-    if pressingleft
+    if keyboard.pressingleft
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
     then gameobjects[1]:rotate_left(elapsed) end
 
-    if pressingup then gameobjects[1]:accelerate(elapsed) end
+    if keyboard.pressingup then gameobjects[1]:accelerate(elapsed) end
 
-    if pressingdown then gameobjects[1]:reverse(elapsed) end
+    if keyboard.pressingdown then gameobjects[1]:reverse(elapsed) end
     
-    if pressingunderscore then gameobjects[1]:rotate_weapon_right(elapsed) end
-    if pressingslash then gameobjects[1]:rotate_weapon_left(elapsed) end
-
+    if keyboard['pressing_'] then gameobjects[1]:rotate_weapon_right(elapsed) end
+    if keyboard['pressing/'] then gameobjects[1]:rotate_weapon_left(elapsed) end
+    
     gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
     gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
 
@@ -242,12 +209,13 @@ function love.draw()
         love.window.setTitle(gameobjects[1].angle)
         love.graphics.print("x (center): " .. math.floor(gameobjects[1].x), camera.width - 135, 110)
         love.graphics.print("y (center): " .. math.floor(gameobjects[1].y), camera.width - 135, 130)
-        love.graphics.print("elapsed: " .. math.floor(elapsed * 1000) / 1000, camera.width - 135, 135)
+        love.graphics.print("elapsed: " .. math.floor(elapsed * 1000) / 1000, camera.width - 135, 150)
         love.graphics.print("size modifier: " .. gameobjects[1].size_modifier, camera.width - 135, 170)
         love.graphics.print("width: " .. gameobjects[1].width, camera.width - 135, 190)
         love.graphics.print("height: " .. gameobjects[1].width, camera.width - 135, 210)
         love.graphics.print("camera left: " .. camera.left, camera.width - 135, 230)
         love.graphics.print("camera top: " .. camera.top, camera.width - 135, 250)
+        love.graphics.print("last key: " .. keyboard.lastkeypressed, camera.width - 135, 270)
 
         -- end of debugging code
 
