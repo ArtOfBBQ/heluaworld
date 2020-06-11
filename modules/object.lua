@@ -3,6 +3,14 @@ object = {
     sprite_top = nil,
     x = 100,
     y = 100,
+    topleft_x = nil,
+    topleft_y = nil,
+    topright_x = nil,
+    topright_y = nil,
+    bottomleft_x = nil,
+    bottomleft_y = nil,
+    bottomright_x = nil,
+    bottomright_y = nil,
     width = 10,
     height = 10, -- 156 at size_modifier = 1, will be downsized in new()
     x_velocity = 0,
@@ -10,6 +18,7 @@ object = {
     max_speed_while_rotating = 0.75,
     angle = 2,
     weapon_angle = nil,
+    colliding = false,
     max_speed = 20,
     max_reverse_speed = 5,
     accel_speed = 0.125,
@@ -67,7 +76,7 @@ function object.rotate_weapon_right(self, elapsed)
     local increment = self.rotation_speed * elapsed
 
     self.weapon_angle = self.weapon_angle + increment
-    
+
     self:fix_radians_bounds('weapon_angle')
 
 end

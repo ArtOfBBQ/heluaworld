@@ -10,7 +10,7 @@ function love.load()
 
 
     local object = require('modules.object')
-    local helper = require('modules.helper')
+    local collision = require('modules.collision')
     local images = require('modules.imagefilenames')
     local camera = require('modules.camera')
     local keyboard = require('modules.keyboard')
@@ -23,13 +23,10 @@ function love.load()
     assert(gameobjects[1].sprite_top == 'tankgun')
     gameobjects[1].weapon_angle = gameobjects[1].angle + 0.4
 
-    gameobjects[2] = object:newtree(70, 400)
-    gameobjects[3] = object:newtree(80, 440)
-    gameobjects[4] = object:newtree(95, 285)
-    gameobjects[5] = object:newtree(50, 525)
-    gameobjects[6] = object:newtree(115, 320)
-    gameobjects[7] = object:newtree(335, 700)
-
+    gameobjects[2] = object:newtree(300, 300)
+    gameobjects[2].angle = 0
+    gameobjects[2].angle = 0.35
+    
     previous_time = os.clock()
 
 end
@@ -76,12 +73,16 @@ function love.update(dt)
     if keyboard.pressingright
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-    then gameobjects[1]:rotate_right(elapsed) end
+    then 
+        gameobjects[1]:rotate_right(elapsed) 
+    end
 
     if keyboard.pressingleft
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-    then gameobjects[1]:rotate_left(elapsed) end
+    then 
+        gameobjects[1]:rotate_left(elapsed)
+    end
 
     if keyboard.pressingup then gameobjects[1]:accelerate(elapsed) end
 
@@ -93,10 +94,50 @@ function love.update(dt)
     gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
     gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
 
-    -- decelerate naturally
+    -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
         gameobjects[i]:decelerate(elapsed)
+
+        -- this big code block updates the 4 vital coordinates of our rectangular object
+        -- given the center and the angle they're currently rotated at
+        gameobjects[i].topleft_x = gameobjects[i].x + collision.rotate_x_coord(
+            -gameobjects[i].width / 2,
+            -gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].topleft_y = gameobjects[i].y + collision.rotate_y_coord(
+            -gameobjects[i].width / 2,
+            -gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].topright_x = gameobjects[i].x + collision.rotate_x_coord(
+            gameobjects[i].width / 2,
+            -gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].topright_y = gameobjects[i].y + collision.rotate_y_coord(
+            gameobjects[i].width / 2,
+            -gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].bottomright_x = gameobjects[i].x + collision.rotate_x_coord(
+            gameobjects[i].width / 2,
+            gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].bottomright_y = gameobjects[i].y + collision.rotate_y_coord(
+            gameobjects[i].width / 2,
+            gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].bottomleft_x = gameobjects[i].x + collision.rotate_x_coord(
+            -gameobjects[i].width / 2,
+            gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        gameobjects[i].bottomleft_y = gameobjects[i].y + collision.rotate_y_coord(
+            -gameobjects[i].width / 2,
+            gameobjects[i].height / 2,
+            gameobjects[i].angle)
+        
+        -- about to detect collisions so set to false 
+        gameobjects[i].colliding = false
     end
+
+    collision.update_all_collisions(gameobjects)
 
 end
 
@@ -104,7 +145,7 @@ function love.draw()
     
     for i = 1, #gameobjects, 1 do
 
-        -- love.graphics.draw(imageobject, x, y, rotation, somescaleparam, somescaleparam, originx, originy)
+        love.graphics.setColor(1, 1, 1)
         assert(gameobjects[i].sprite_frame ~= nil)
         assert(images[gameobjects[i].sprite_frame] ~= nil)
         love.graphics.draw(
@@ -131,75 +172,37 @@ function love.draw()
         
         -- for debugging only, draw little circles to outline the object
         if debug_mode then
-            -- top left of object
-            local rotated_x = camera.x_world_to_screen(
-                gameobjects[i].x + helper.rotate_x_coord(
-                    (-gameobjects[i].width / 2),
-                    (-gameobjects[i].height / 2),
-                    gameobjects[i].angle))
-            local rotated_y = camera.y_world_to_screen(
-                gameobjects[i].y + helper.rotate_y_coord(
-                    (-gameobjects[i].width / 2),
-                    (-gameobjects[i].height / 2),
-                    gameobjects[i].angle))
+
+            if gameobjects[i].colliding then love.graphics.setColor(1, 0.15, 0.15) else love.graphics.setColor(1, 1, 1) end
+
             love.graphics.circle(
                 "fill",
-                rotated_x,
-                rotated_y,
+                camera.x_world_to_screen(gameobjects[i].topleft_x),
+                camera.y_world_to_screen(gameobjects[i].topleft_y),
                 2)
-            -- center of object
+
             love.graphics.circle(
                 "fill",
                 camera.x_world_to_screen(gameobjects[i].x),
                 camera.y_world_to_screen(gameobjects[i].y),
                 2)
-            -- top right of object
-            rotated_x = camera.x_world_to_screen(
-                gameobjects[i].x + helper.rotate_x_coord(
-                    (gameobjects[i].width / 2),
-                    (-gameobjects[i].height / 2),
-                    gameobjects[i].angle))
-            rotated_y = camera.y_world_to_screen(
-                gameobjects[i].y + helper.rotate_y_coord(
-                    (gameobjects[i].width / 2),
-                    (-gameobjects[i].height / 2),
-                    gameobjects[i].angle))
+            
             love.graphics.circle(
                 "fill",
-                rotated_x,
-                rotated_y,
+                camera.x_world_to_screen(gameobjects[i].topright_x),
+                camera.y_world_to_screen(gameobjects[i].topright_y),
                 2)
-            -- bottom right of object
-            rotated_x = camera.x_world_to_screen(
-                gameobjects[i].x + helper.rotate_x_coord(
-                    (gameobjects[i].width / 2),
-                    (gameobjects[i].height / 2),
-                    gameobjects[i].angle))
-            rotated_y = camera.y_world_to_screen(
-                gameobjects[i].y + helper.rotate_y_coord(
-                    (gameobjects[i].width / 2),
-                    (gameobjects[i].height / 2),
-                    gameobjects[i].angle))
+            
             love.graphics.circle(
                 "fill",
-                rotated_x,
-                rotated_y,
+                camera.x_world_to_screen(gameobjects[i].bottomright_x),
+                camera.y_world_to_screen(gameobjects[i].bottomright_y),
                 2)
-            -- bottom left of object
-            rotated_x = camera.x_world_to_screen(
-                gameobjects[i].x + helper.rotate_x_coord(
-                    (-gameobjects[i].width / 2),
-                    (gameobjects[i].height / 2),
-                    gameobjects[i].angle))
-            rotated_y = camera.y_world_to_screen(
-                gameobjects[i].y + helper.rotate_y_coord(
-                    (-gameobjects[i].width / 2),
-                    (gameobjects[i].height / 2),
-                    gameobjects[i].angle))
+            
             love.graphics.circle(
                 "fill",
-                rotated_x,
-                rotated_y,
+                camera.x_world_to_screen(gameobjects[i].bottomleft_x),
+                camera.y_world_to_screen(gameobjects[i].bottomleft_y),
                 2)
         end
         
@@ -216,6 +219,7 @@ function love.draw()
         love.graphics.print("camera left: " .. camera.left, camera.width - 135, 230)
         love.graphics.print("camera top: " .. camera.top, camera.width - 135, 250)
         love.graphics.print("last key: " .. keyboard.lastkeypressed, camera.width - 135, 270)
+        love.graphics.print("player colliding: " .. tostring(gameobjects[1].colliding), camera.width - 135, 290)
 
         -- end of debugging code
 

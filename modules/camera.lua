@@ -4,7 +4,7 @@ camera = {
     left = 0,
     top = 0,
     speed = 200,
-    zoom = 1,
+    zoom = 2,
     zoomspeed = 2}
 
 -- masterfully explained by javidx9
