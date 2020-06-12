@@ -19,12 +19,12 @@ object = {
     angle = 2,
     weapon_angle = nil,
     colliding = false,
-    max_speed = 20,
-    max_reverse_speed = 5,
-    accel_speed = 0.125,
+    max_speed = 30,
+    max_reverse_speed = 10,
+    accel_speed = 0.2,
     decel_speed = 0.1,
     reverse_accel_speed = 0.125,
-    rotation_speed = 1.25,
+    rotation_speed = 1.75,
     size_modifier = 1
 }
 

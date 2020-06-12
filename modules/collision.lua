@@ -113,6 +113,18 @@ function collision.update_all_collisions(gameobjects)
                 then
                     gameobjects[i].colliding = true
                     gameobjects[j].colliding = true
+
+                    if math.abs(gameobjects[j].x_velocity) > math.abs(gameobjects[i].x_velocity) then
+                        gameobjects[i].x = gameobjects[i].x + ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (1 + gameobjects[i].x_velocity))
+                    else
+                        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (1 + gameobjects[j].x_velocity))
+                    end
+
+                    if math.abs(gameobjects[j].y_velocity) > math.abs(gameobjects[i].y_velocity) then
+                        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (1 + gameobjects[i].y_velocity))
+                    else
+                        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (1 + gameobjects[j].y_velocity))
+                    end
                 end
 
             end

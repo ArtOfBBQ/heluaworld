@@ -25,6 +25,11 @@ function love.load()
 
     gameobjects[2] = object:newtank(300, 100)
     gameobjects[2].angle = 0.15
+
+    gameobjects[3] = object.newtree(50, 660)
+    gameobjects[4] = object.newtree(65, 600)
+    gameobjects[5] = object.newtree(45, 580)
+    gameobjects[6] = object.newtree(70, 670)
     
     previous_time = os.clock()
 
@@ -72,6 +77,7 @@ function love.update(dt)
     if keyboard.pressingright
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
+        and gameobjects[1].colliding == false
     then 
         gameobjects[1]:rotate_right(elapsed) 
     end
@@ -79,6 +85,7 @@ function love.update(dt)
     if keyboard.pressingleft
         and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
         and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
+        and gameobjects[1].colliding == false
     then 
         gameobjects[1]:rotate_left(elapsed)
     end
@@ -90,9 +97,10 @@ function love.update(dt)
     if keyboard['pressing_'] then gameobjects[1]:rotate_weapon_right(elapsed) end
     if keyboard['pressing/'] then gameobjects[1]:rotate_weapon_left(elapsed) end
     
-    gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
-    gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
-    gameobjects[2].angle = gameobjects[2].angle + 0.001
+    if gameobjects[1].colliding == false then
+        gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
+        gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
+    end
 
     -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
