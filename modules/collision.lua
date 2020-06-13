@@ -114,16 +114,20 @@ function collision.update_all_collisions(gameobjects)
                     gameobjects[i].colliding = true
                     gameobjects[j].colliding = true
 
-                    if math.abs(gameobjects[j].x_velocity) > math.abs(gameobjects[i].x_velocity) then
-                        gameobjects[i].x = gameobjects[i].x + ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (1 + gameobjects[i].x_velocity))
+                    if math.abs((gameobjects[j].x_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].x_velocity + 1) * gameobjects[i].weight) then
+                        gameobjects[i].x = gameobjects[i].x +  ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (2 + gameobjects[i].x_velocity))
+                        gameobjects[i].x_velocity = 0
                     else
-                        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (1 + gameobjects[j].x_velocity))
+                        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (2 + gameobjects[j].x_velocity))
+                        gameobjects[j].x_velocity = 0
                     end
 
-                    if math.abs(gameobjects[j].y_velocity) > math.abs(gameobjects[i].y_velocity) then
-                        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (1 + gameobjects[i].y_velocity))
+                    if math.abs((gameobjects[j].y_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].y_velocity + 1) * gameobjects[i].weight) then
+                        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (2 + gameobjects[i].y_velocity))
+                        gameobjects[i].x_velocity = 0
                     else
-                        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (1 + gameobjects[j].y_velocity))
+                        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (2 + gameobjects[j].y_velocity))
+                        gameobjects[j].y_velocity = 0
                     end
                 end
 

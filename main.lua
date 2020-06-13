@@ -5,9 +5,9 @@ local debug_mode = false
 
 local map = {width = 20000, height = 20000}
 
+local i_player = 2
 
 function love.load()
-
 
     local object = require('modules.object')
     local collision = require('modules.collision')
@@ -18,18 +18,20 @@ function love.load()
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
     love.window.setTitle('Macro & Conquer')
     
-    gameobjects[1] = object:newtank()
-    assert(gameobjects[1].sprite_frame == 'tank')
-    assert(gameobjects[1].sprite_top == 'tankgun')
-    gameobjects[1].weapon_angle = gameobjects[1].angle + 0.4
+    gameobjects[1] = object:newbuggy()
+    gameobjects[1].angle = 0
+    gameobjects[1].weapon_angle = gameobjects[1].angle
 
     gameobjects[2] = object:newtank(300, 100)
-    gameobjects[2].angle = 0.15
+    gameobjects[2].angle = 0
+    gameobjects[2].weapon_angle = 0
 
     gameobjects[3] = object.newtree(50, 660)
     gameobjects[4] = object.newtree(65, 600)
     gameobjects[5] = object.newtree(45, 580)
     gameobjects[6] = object.newtree(70, 670)
+
+    gameobjects[7] = object.newrock(20, 50)
     
     previous_time = os.clock()
 
@@ -52,6 +54,8 @@ end
 function love.mousepressed(x, y, button, istouch)
 
     if debug_mode == true then debug_mode = false else debug_mode = true end
+
+    if i_player == 1 then i_player = 2 else i_player = 1 end
     
 end
 
@@ -75,31 +79,31 @@ function love.update(dt)
     if keyboard.pressings then camera.top = camera.top + (camera.speed * elapsed) end
 
     if keyboard.pressingright
-        and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
-        and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-        and gameobjects[1].colliding == false
+        and math.abs(gameobjects[i_player].x_velocity) < gameobjects[i_player].max_speed_while_rotating 
+        and math.abs(gameobjects[i_player].y_velocity) < gameobjects[i_player].max_speed_while_rotating
+        and gameobjects[i_player].colliding == false
     then 
-        gameobjects[1]:rotate_right(elapsed) 
+        gameobjects[i_player]:rotate_right(elapsed) 
     end
 
     if keyboard.pressingleft
-        and math.abs(gameobjects[1].x_velocity) < gameobjects[1].max_speed_while_rotating 
-        and math.abs(gameobjects[1].y_velocity) < gameobjects[1].max_speed_while_rotating
-        and gameobjects[1].colliding == false
+        and math.abs(gameobjects[i_player].x_velocity) < gameobjects[i_player].max_speed_while_rotating 
+        and math.abs(gameobjects[i_player].y_velocity) < gameobjects[i_player].max_speed_while_rotating
+        and gameobjects[i_player].colliding == false
     then 
-        gameobjects[1]:rotate_left(elapsed)
+        gameobjects[i_player]:rotate_left(elapsed)
     end
 
-    if keyboard.pressingup then gameobjects[1]:accelerate(elapsed) end
+    if keyboard.pressingup then gameobjects[i_player]:accelerate(elapsed) end
 
-    if keyboard.pressingdown then gameobjects[1]:reverse(elapsed) end
+    if keyboard.pressingdown then gameobjects[i_player]:reverse(elapsed) end
     
-    if keyboard['pressing_'] then gameobjects[1]:rotate_weapon_right(elapsed) end
-    if keyboard['pressing/'] then gameobjects[1]:rotate_weapon_left(elapsed) end
+    if keyboard['pressing_'] then gameobjects[i_player]:rotate_weapon_right(elapsed) end
+    if keyboard['pressing/'] then gameobjects[i_player]:rotate_weapon_left(elapsed) end
     
-    if gameobjects[1].colliding == false then
-        gameobjects[1].x = gameobjects[1].x + gameobjects[1].x_velocity
-        gameobjects[1].y = gameobjects[1].y + gameobjects[1].y_velocity
+    if gameobjects[i_player].colliding == false then
+        gameobjects[i_player].x = gameobjects[i_player].x + gameobjects[i_player].x_velocity
+        gameobjects[i_player].y = gameobjects[i_player].y + gameobjects[i_player].y_velocity
     end
 
     -- decelerate naturally and update all object coordinates
@@ -150,6 +154,13 @@ function love.update(dt)
 end
 
 function love.draw()
+
+    -- draw background tiles
+    for i = 0, love.graphics.getWidth() / images.sand:getWidth() do
+        for j = 0, love.graphics.getHeight() / images.sand:getHeight() do
+            love.graphics.draw(images.sand, i * images.sand:getWidth(), j * images.sand:getHeight())
+        end
+    end
     
     for i = 1, #gameobjects, 1 do
 
@@ -169,13 +180,13 @@ function love.draw()
         if gameobjects[i]['weapon_angle'] ~= nil then
             love.graphics.draw(
                 images[gameobjects[i].sprite_top],
-                camera.x_world_to_screen(gameobjects[i].x),
-                camera.y_world_to_screen(gameobjects[i].y),
+                camera.x_world_to_screen(gameobjects[i].x + collision.rotate_x_coord(0, gameobjects[i].weapon_y_offset, gameobjects[i].angle)),
+                camera.y_world_to_screen(gameobjects[i].y + collision.rotate_y_coord(0, gameobjects[i].weapon_y_offset, gameobjects[i].angle)),
                 gameobjects[i].weapon_angle,
                 gameobjects[i].size_modifier * camera.zoom,
                 gameobjects[i].size_modifier * camera.zoom,
                 images[gameobjects[i].sprite_top]:getWidth() / 2,
-                (images[gameobjects[i].sprite_top]:getHeight() / 2) + 30)
+                images[gameobjects[i].sprite_top]:getHeight() / 2)
         end
         
         -- for debugging only, draw little circles to outline the object
@@ -218,19 +229,19 @@ function love.draw()
     end
     
     love.graphics.setColor(1, 1, 1)
-    love.graphics.print("x velocity: " .. math.floor(gameobjects[1].x_velocity * 100)/100, camera.width - 135, 50)
-        love.graphics.print("y velocity: " .. math.floor(gameobjects[1].y_velocity * 100)/100, camera.width - 135, 70)
-        love.graphics.print("angle: " .. math.floor(gameobjects[1].angle * 100) / 100, camera.width - 135, 90)
-        love.window.setTitle(gameobjects[1].angle)
-        love.graphics.print("x (center): " .. math.floor(gameobjects[1].x), camera.width - 135, 110)
-        love.graphics.print("y (center): " .. math.floor(gameobjects[1].y), camera.width - 135, 130)
+    love.graphics.print("x velocity: " .. math.floor(gameobjects[i_player].x_velocity * 100)/100, camera.width - 135, 50)
+        love.graphics.print("y velocity: " .. math.floor(gameobjects[i_player].y_velocity * 100)/100, camera.width - 135, 70)
+        love.graphics.print("angle: " .. math.floor(gameobjects[i_player].angle * 100) / 100, camera.width - 135, 90)
+        love.window.setTitle(gameobjects[i_player].angle)
+        love.graphics.print("x (center): " .. math.floor(gameobjects[i_player].x), camera.width - 135, 110)
+        love.graphics.print("y (center): " .. math.floor(gameobjects[i_player].y), camera.width - 135, 130)
         love.graphics.print("elapsed: " .. math.floor(elapsed * 1000) / 1000, camera.width - 135, 150)
-        love.graphics.print("size modifier: " .. gameobjects[1].size_modifier, camera.width - 135, 170)
-        love.graphics.print("width: " .. gameobjects[1].width, camera.width - 135, 190)
-        love.graphics.print("height: " .. gameobjects[1].width, camera.width - 135, 210)
+        love.graphics.print("size modifier: " .. gameobjects[i_player].size_modifier, camera.width - 135, 170)
+        love.graphics.print("width: " .. gameobjects[i_player].width, camera.width - 135, 190)
+        love.graphics.print("height: " .. gameobjects[i_player].width, camera.width - 135, 210)
         love.graphics.print("camera left: " .. camera.left, camera.width - 135, 230)
         love.graphics.print("camera top: " .. camera.top, camera.width - 135, 250)
         love.graphics.print("last key: " .. keyboard.lastkeypressed, camera.width - 135, 270)
-        love.graphics.print("player colliding: " .. tostring(gameobjects[1].colliding), camera.width - 135, 290)
+        love.graphics.print("player colliding: " .. tostring(gameobjects[i_player].colliding), camera.width - 135, 290)
     
 end

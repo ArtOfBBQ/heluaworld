@@ -13,11 +13,13 @@ object = {
     bottomright_y = nil,
     width = 10,
     height = 10, -- 156 at size_modifier = 1, will be downsized in new()
+    weight = 50,
     x_velocity = 0,
     y_velocity = 0,
     max_speed_while_rotating = 0.75,
     angle = 2,
     weapon_angle = nil,
+    weapon_y_offset = 0,
     colliding = false,
     max_speed = 30,
     max_reverse_speed = 10,
@@ -163,9 +165,38 @@ function object:newtank(x, y)
     o.decel_speed = 0.1
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
+    o.weapon_y_offset = 2
+    
+    o.weight = 400
 
     o.width = 80 * o.size_modifier
     o.height = 156 * o.size_modifier
+
+    return o
+end
+
+function object:newbuggy(x, y)
+
+    o = object:new()
+
+    o.x = x
+    o.y = y
+    o.sprite_frame = 'buggy'
+    o.sprite_top = 'buggygun'
+    o.max_speed = 40
+    o.max_reverse_speed = 15
+    o.accel_speed = 1.5
+    o.decel_speed = 0.4
+    o.reverse_accel_speed = 1
+    o.weapon_angle = 0.3
+    o.size_modifier = 0.04
+    o.rotation_speed = 3
+    o.weapon_y_offset = 8
+
+    o.weight = 20
+
+    o.width = 376 * o.size_modifier
+    o.height = 720 * o.size_modifier
 
     return o
 end
@@ -188,8 +219,36 @@ function object:newtree(x, y)
     o.angle = math.random() * 6.28
     o.size_modifier = 0.33 * ((1 + math.random()) / 1.5)
 
+    o.weight = 200
+
     o.width = 128 * o.size_modifier
     o.height = 128 * o.size_modifier
+
+    return o
+end
+
+
+local rock_images = {'rock1'} --, 'rock2', 'rock3', 'rock4', 'rock5', 'rock6', 'rock7', 'rock8', 'rock9'}
+
+function object:newrock(x, y)
+
+    o = object:new()
+
+    o.x = x
+    o.y = y
+    o.sprite_frame = rock_images[ math.random( #rock_images ) ]
+    o.sprite_top = nil
+    o.max_speed = 0
+    o.max_reverse_speed = 0
+    o.accel_speed = 0
+    o.decel_speed = 0
+    o.angle = math.random() * 6.28
+    o.size_modifier = 0.05 * (1 + 0.05)
+
+    o.width = 646 * o.size_modifier
+    o.height = 534 * o.size_modifier
+
+    o.weight = 100 * (o.width + o.height)
 
     return o
 end
