@@ -127,6 +127,15 @@ function object.reverse(self, elapsed)
 
 end
 
+function object.update_position(self, map_width, map_height)
+
+    if self.colliding == false then
+        self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width)
+        self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height)
+    end
+
+end
+
 function object.adjust_size(self, new_size_modifier)
 
     local orig_width = (1/self.size_modifier) * self.width
@@ -183,15 +192,16 @@ function object:newbuggy(x, y)
     o.y = y
     o.sprite_frame = 'buggy'
     o.sprite_top = 'buggygun'
-    o.max_speed = 40
+    o.max_speed = 30
     o.max_reverse_speed = 15
     o.accel_speed = 1.5
-    o.decel_speed = 0.4
-    o.reverse_accel_speed = 1
+    o.decel_speed = 1.5
+    o.reverse_accel_speed = 1.5
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
     o.rotation_speed = 3
     o.weapon_y_offset = 8
+    o.max_speed_while_rotating = 50
 
     o.weight = 20
 
@@ -230,7 +240,10 @@ end
 
 local rock_images = {'rock1'} --, 'rock2', 'rock3', 'rock4', 'rock5', 'rock6', 'rock7', 'rock8', 'rock9'}
 
-function object:newrock(x, y)
+function object.newrock(x, y)
+
+    assert(x ~= nil)
+    assert(y ~= nil)
 
     o = object:new()
 

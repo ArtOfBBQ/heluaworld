@@ -16,16 +16,18 @@ images.tree8 = love.graphics.newImage("assets/images/terrain/tree8.png")
 images.tree9 = love.graphics.newImage("assets/images/terrain/tree9.png")
 
 images.rock1 = love.graphics.newImage("assets/images/terrain/rock1.png")
-images.rock2 = love.graphics.newImage("assets/images/terrain/rock2.png")
-images.rock3 = love.graphics.newImage("assets/images/terrain/rock3.png")
-images.rock4 = love.graphics.newImage("assets/images/terrain/rock4.png")
-images.rock5 = love.graphics.newImage("assets/images/terrain/rock5.png")
-images.rock6 = love.graphics.newImage("assets/images/terrain/rock6.png")
-images.rock7 = love.graphics.newImage("assets/images/terrain/rock7.png")
-images.rock8 = love.graphics.newImage("assets/images/terrain/rock8.png")
-images.rock9 = love.graphics.newImage("assets/images/terrain/rock9.png")
-
 
 images.sand = love.graphics.newImage("assets/images/terrain/beach0.png")
+
+images.grass1 = love.graphics.newImage("assets/images/terrain/grass1.png")
+images.grass2 = love.graphics.newImage("assets/images/terrain/grass2.png")
+images.grassbeach1 = love.graphics.newImage("assets/images/terrain/grassbeach1.png")
+images.grassbeach2 = love.graphics.newImage("assets/images/terrain/grassbeach2.png")
+images.grassbeach3 = love.graphics.newImage("assets/images/terrain/grassbeach3.png")
+images.grassbeach4 = love.graphics.newImage("assets/images/terrain/grassbeach4.png")
+images.grassbeach5 = love.graphics.newImage("assets/images/terrain/grassbeach5.png")
+images.grassbeach6 = love.graphics.newImage("assets/images/terrain/grassbeach6.png")
+images.grassbeach7 = love.graphics.newImage("assets/images/terrain/grassbeach7.png")
+images.grassbeach8 = love.graphics.newImage("assets/images/terrain/grassbeach8.png")
 
 return images
