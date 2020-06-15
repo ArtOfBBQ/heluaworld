@@ -1,6 +1,6 @@
 camera = {
-    width = 1200,
-    height = 1000,
+    width = 1025,
+    height = 1025,
     left = 0,
     top = 0,
     speed = 1000,
@@ -30,19 +30,23 @@ end
 function camera.zoom_in(self, elapsed)
 
     self.zoom = self.zoom + (self.zoomspeed * elapsed)
+    self.left = self.left + (50 * self.zoomspeed * elapsed)
+    self.top = self.top + (50 * self.zoomspeed * elapsed)
 
 end
 
 function camera.zoom_out(self, elapsed)
 
     self.zoom = self.zoom - (self.zoomspeed * elapsed)
+    self.left = self.left - (50 * self.zoomspeed * elapsed)
+    self.top = self.top - (50 * self.zoomspeed * elapsed)
 
 end
 
 function camera.scroll_right(self, elapsed, map_width)
 
     assert(map_width ~= nil)
-    self.left = math.min(self.left + (self.speed * elapsed), map_width - camera.width)
+    self.left = math.min(self.left + (self.speed * elapsed), map_width)
 
 end
 
@@ -62,7 +66,7 @@ end
 function camera.scroll_down(self, elapsed, map_height)
 
     assert(map_height ~= nil)
-    self.top = math.min(self.top + (self.speed * elapsed), map_height - camera.height)
+    self.top = math.min(self.top + (self.speed * elapsed), map_height)
 
 end
 

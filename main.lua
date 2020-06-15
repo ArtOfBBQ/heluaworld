@@ -282,5 +282,4 @@ function love.draw()
     love.graphics.print("last clicked y: " .. clicked_y, camera.width - 135, 370)
     love.graphics.print("file was: " .. saved_text, camera.width - 135, 390)
 
-    
 end
