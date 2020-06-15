@@ -1,26 +1,4 @@
-map = {
-    width = 1500,
-    height = 1500,
-    background_tiles = {}
-}
-
-
-for i = 0, map.width, 50 do
-    for j = 0, map.height, 50 do
-        
-        local cur_image = "sand"
-        
-        map.background_tiles[#map.background_tiles + 1] = 
-        {
-            left = i,
-            top = j,
-            width = 50,
-            height = 50,
-            image = cur_image
-        }
-
-    end
-end
+map = require("maps.map1")
 
 -- this is a temporary function to edit the map
 -- it cycles the image sprite for whatever tile is at position x,y
@@ -66,6 +44,39 @@ function map.cycle_tile(self, x, y)
         else
             self.background_tiles[i].image = "sand"
     end
+end
+
+function map.save_tiles_as_hardcode(self, filename, gameobjects)
+
+    assert(filename ~= nil)
+
+    local file = io.open(filename, "w")
+
+    assert(file ~= nil)
+
+
+    for i = 1, #self.background_tiles, 1 do
+        if map.background_tiles[i].image ~= "sand" then
+            file:write('map.background_tiles[' .. i .. '].image = "' .. map.background_tiles[i].image .. '"\n')
+        end
+    end
+
+    for i = 1, #gameobjects, 1 do
+        if gameobjects[i].max_speed == 0 then
+
+            file:write('map.gameobjects[#map.gameobjects + 1] = {}\n')
+            file:write('map.gameobjects[#map.gameobjects].sprite_frame = "' .. gameobjects[i].sprite_frame .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].size_modifier = "' .. gameobjects[i].size_modifier .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].x = "' .. gameobjects[i].x .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].y = "' .. gameobjects[i].y .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].weight = "' .. gameobjects[i].weight .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].angle = "' .. gameobjects[i].angle .. '"\n')
+        
+        end
+    end
+
+    io.close(file)
+
 end
 
 

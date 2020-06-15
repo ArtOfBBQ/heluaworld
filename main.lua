@@ -25,6 +25,18 @@ function love.load()
     gameobjects[1] = object:newbuggy(1500, 1500)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
+
+    if #map.gameobjects > 0 then
+        for i = 1, #map.gameobjects, 1 do
+            gameobjects[#gameobjects + 1] = object:new()
+            gameobjects[#gameobjects].max_speed = 0
+            gameobjects[#gameobjects].x = map.gameobjects[i].x
+            gameobjects[#gameobjects].y = map.gameobjects[i].y
+            gameobjects[#gameobjects].sprite_frame = map.gameobjects[i].sprite_frame
+            gameobjects[#gameobjects].size_modifier = map.gameobjects[i].size_modifier
+            gameobjects[#gameobjects].angle = map.gameobjects[i].angle
+        end
+    end
     
     previous_time = os.clock()
 
@@ -46,12 +58,21 @@ end
 
 function love.mousepressed(x, y, button, istouch)
 
-    clicked_x = camera.x_screen_to_world(x)
-    clicked_y = camera.y_screen_to_world(y)
+    clicked_x = camera:x_screen_to_world(x)
+    clicked_y = camera:y_screen_to_world(y)
 
-    map:cycle_tile(
-        camera.x_screen_to_world(x),
-        camera.y_screen_to_world(y))
+
+    if keyboard['pressingr'] then
+        gameobjects[#gameobjects + 1] = object.newrock(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+    elseif keyboard['pressingt'] then 
+        gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+    elseif keyboard['pressingm'] then
+        map:cycle_tile(
+            camera.x_screen_to_world(x),
+            camera.y_screen_to_world(y))
+    else
+        if debug_mode == false then debug_mode = true else debug_mode = false end
+    end
     
 end
 
@@ -97,6 +118,8 @@ function love.update(dt)
     
     if keyboard['pressing_'] then gameobjects[i_player]:rotate_weapon_right(elapsed) end
     if keyboard['pressing/'] then gameobjects[i_player]:rotate_weapon_left(elapsed) end
+
+    if keyboard['pressingz'] then map:save_tiles_as_hardcode("/users/jelle//test.lua", gameobjects) end
     
     
     -- decelerate naturally and update all object coordinates

@@ -7,15 +7,15 @@ camera = {
     zoom = 1,
     zoomspeed = 2}
 
-function camera.x_screen_to_world(x_screen)
+function camera.x_screen_to_world(self, x_screen)
 
-    return (x_screen / camera.zoom) + camera.left
+    return (x_screen + self.left) / camera.zoom
 
 end
 
-function camera.y_screen_to_world(y_screen)
+function camera.y_screen_to_world(self, y_screen)
 
-    return (y_screen / camera.zoom) + camera.top
+    return (y_screen + self.top) / camera.zoom
 
 end
 
