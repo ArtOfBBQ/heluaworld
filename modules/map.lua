@@ -1,14 +1,6 @@
 map = require("maps.map1")
 
--- this is a temporary function to edit the map
--- it cycles the image sprite for whatever tile is at position x,y
---
--- [x1, y1] [x2, y1]
--- [x1, y2] [x2, y2]
--- [x1, y3]
--- [x1, y4]
--- [x1, y5]
--- [x1, y6]
+-- Flips one of the background tile images (grass, sand, etc.)
 function map.cycle_tile(self, x, y)
 
     local tiles_per_row = math.ceil(self.width / 50)
@@ -19,7 +11,6 @@ function map.cycle_tile(self, x, y)
     local target_top = math.floor(y / 50)
 
     local i = 1 + (target_left * (tiles_per_col + 1)) + (target_top)
-    assert(math.abs(self.background_tiles[i].left - x) < 51, "found tile with x: " .. self.background_tiles[i].left .. " but clicked x:" .. x)
 
     if self.background_tiles[i].image == "sand" then
             self.background_tiles[i].image = "grass2"
@@ -51,9 +42,7 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
     assert(filename ~= nil)
 
     local file = io.open(filename, "w")
-
     assert(file ~= nil)
-
 
     for i = 1, #self.background_tiles, 1 do
         if map.background_tiles[i].image ~= "sand" then
@@ -66,11 +55,11 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
 
             file:write('map.gameobjects[#map.gameobjects + 1] = {}\n')
             file:write('map.gameobjects[#map.gameobjects].sprite_frame = "' .. gameobjects[i].sprite_frame .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].size_modifier = "' .. gameobjects[i].size_modifier .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].x = "' .. gameobjects[i].x .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].y = "' .. gameobjects[i].y .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].weight = "' .. gameobjects[i].weight .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].angle = "' .. gameobjects[i].angle .. '"\n')
+            file:write('map.gameobjects[#map.gameobjects].size_modifier = ' .. gameobjects[i].size_modifier .. '\n')
+            file:write('map.gameobjects[#map.gameobjects].x = ' .. gameobjects[i].x .. '\n')
+            file:write('map.gameobjects[#map.gameobjects].y = ' .. gameobjects[i].y .. '\n')
+            file:write('map.gameobjects[#map.gameobjects].weight = ' .. gameobjects[i].weight .. '\n')
+            file:write('map.gameobjects[#map.gameobjects].angle = ' .. gameobjects[i].angle .. '\n')
         
         end
     end

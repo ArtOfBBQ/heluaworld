@@ -1,13 +1,18 @@
-local gameobjects = {}
-local elapsed
+-- each obstacle and unit in our RTS is in this array. We're using it everywhere
+-- and it's a singleton, so I'm using a global variable instead of passing it around everywhere
+gameobjects = {}
+
+-- the time elapsed since the previous iteration of our game loop
+elapsed = 0
 local previous_time = os.clock()
+
+-- testing code, to be removed later
 local debug_mode = false
-
 local i_player = 1
-
 local clicked_x = 0
 local clicked_y = 0
 local saved_text = ""
+-- /to be removed later
 
 
 function love.load()
@@ -20,11 +25,13 @@ function love.load()
     local keyboard = require('modules.keyboard')
 
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
-    love.window.setTitle('Macro & Conquer')
+    love.window.setTitle('Produce & Conquer')
     
+    -- testing code, to be removed later
     gameobjects[1] = object:newbuggy(1500, 1500)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
+    -- /to be removed later
 
     if #map.gameobjects > 0 then
         for i = 1, #map.gameobjects, 1 do
@@ -68,8 +75,8 @@ function love.mousepressed(x, y, button, istouch)
         gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
     elseif keyboard['pressingm'] then
         map:cycle_tile(
-            camera.x_screen_to_world(x),
-            camera.y_screen_to_world(y))
+            camera:x_screen_to_world(x),
+            camera:y_screen_to_world(y))
     else
         if debug_mode == false then debug_mode = true else debug_mode = false end
     end
@@ -166,7 +173,7 @@ function love.update(dt)
         gameobjects[i].colliding = false
     end
 
-    collision.update_all_collisions(gameobjects)
+    collision.update_all_collisions()
 
 end
 

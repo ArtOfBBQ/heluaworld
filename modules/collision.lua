@@ -34,7 +34,7 @@ function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y
 end
 
 
-function collision.point_collides_object_noangle(x, y, object)
+function collision.point_collides_unrotated_object(x, y, object)
 
     -- all of our objects are rotated rectangles
     -- so this function won't work out of the box
@@ -60,80 +60,179 @@ function collision.point_collides_object_noangle(x, y, object)
     return true
 end
 
-function collision.update_all_collisions(gameobjects)
+-- are any of the corners of object i inside unrotated object j?
+-- object j must be an 'unrotated' rectangle
+-- so the edges of the rectangle must be parallel with the screen
+-- edges. This is true when the gameobject[j].angle is 0 (facing up) or 3.14 (facing down), 
+--
+-- note that it's still possible to be in collision even if all 4 corners
+-- are not - the corner of object j could be inside of object i and this
+-- function would still return false
+function collision.are_unrotated_object_corners_colliding(i, j)
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[i].bottomleft_x,
+        gameobjects[i].bottomleft_y,
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[i].topleft_x,
+        gameobjects[i].topleft_y,
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[i].topright_x,
+        gameobjects[i].topright_y,
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[i].bottomright_x,
+        gameobjects[i].bottomright_y,
+        gameobjects[j])
+    then
+        return true
+    end
+
+end
+
+-- are any of the corners of object i inside rotated object j?
+-- this function also works if object j isn't rotated, but it's very expensive
+--
+-- note that it's still possible to be in collision even if all 4 corners
+-- are not - the corner of object j could be inside of object i and this
+-- function would still return false
+function collision.are_rotated_object_corners_colliding(i, j)
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[j].x + collision.rotate_x_coord(
+            gameobjects[j].x - gameobjects[i].bottomleft_x,
+            gameobjects[j].y - gameobjects[i].bottomleft_y,
+            gameobjects[j].angle),
+        gameobjects[j].y + collision.rotate_y_coord(
+            gameobjects[j].x - gameobjects[i].bottomleft_x,
+            gameobjects[j].y - gameobjects[i].bottomleft_y,
+            gameobjects[j].angle),
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[j].x + collision.rotate_x_coord(
+            gameobjects[j].x - gameobjects[i].topleft_x,
+            gameobjects[j].y - gameobjects[i].topleft_y,
+            gameobjects[j].angle),
+        gameobjects[j].y + collision.rotate_y_coord(
+            gameobjects[j].x - gameobjects[i].topleft_x,
+            gameobjects[j].y - gameobjects[i].topleft_y,
+            gameobjects[j].angle),
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[j].x + collision.rotate_x_coord(
+            gameobjects[j].x - gameobjects[i].topright_x,
+            gameobjects[j].y - gameobjects[i].topright_y,
+            gameobjects[j].angle),
+        gameobjects[j].y + collision.rotate_y_coord(
+            gameobjects[j].x - gameobjects[i].topright_x,
+            gameobjects[j].y - gameobjects[i].topright_y,
+            gameobjects[j].angle),
+        gameobjects[j])
+    then
+        return true
+    end
+
+    if collision.point_collides_unrotated_object(
+        gameobjects[j].x + collision.rotate_x_coord(
+            gameobjects[j].x - gameobjects[i].bottomright_x,
+            gameobjects[j].y - gameobjects[i].bottomright_y,
+            gameobjects[j].angle),
+        gameobjects[j].y + collision.rotate_y_coord(
+            gameobjects[j].x - gameobjects[i].bottomright_x,
+            gameobjects[j].y - gameobjects[i].bottomright_y,
+            gameobjects[j].angle),
+        gameobjects[j])
+    then
+        return true
+    end
+
+    return false
+
+end
+
+
+function collision.update_all_collisions()
 
     for i = 1, #gameobjects, 1 do
 
         for j = 1, #gameobjects, 1 do
 
             if i == j then 
-                -- continue 
+                -- an object can't collide with itself
+                -- do nothing
             else
-
-                if collision.point_collides_object_noangle(
-                        gameobjects[j].x + collision.rotate_x_coord(
-                            gameobjects[j].x - gameobjects[i].bottomleft_x,
-                            gameobjects[j].y - gameobjects[i].bottomleft_y,
-                            gameobjects[j].angle),
-                        gameobjects[j].y + collision.rotate_y_coord(
-                            gameobjects[j].x - gameobjects[i].bottomleft_x,
-                            gameobjects[j].y - gameobjects[i].bottomleft_y,
-                            gameobjects[j].angle),
-                        gameobjects[j])
-                    or collision.point_collides_object_noangle(
-                        gameobjects[j].x + collision.rotate_x_coord(
-                            gameobjects[j].x - gameobjects[i].topleft_x,
-                            gameobjects[j].y - gameobjects[i].topleft_y,
-                            gameobjects[j].angle),
-                        gameobjects[j].y + collision.rotate_y_coord(
-                            gameobjects[j].x - gameobjects[i].topleft_x,
-                            gameobjects[j].y - gameobjects[i].topleft_y,
-                            gameobjects[j].angle),
-                        gameobjects[j])
-                    or collision.point_collides_object_noangle(
-                        gameobjects[j].x + collision.rotate_x_coord(
-                            gameobjects[j].x - gameobjects[i].topright_x,
-                            gameobjects[j].y - gameobjects[i].topright_y,
-                            gameobjects[j].angle),
-                        gameobjects[j].y + collision.rotate_y_coord(
-                            gameobjects[j].x - gameobjects[i].topright_x,
-                            gameobjects[j].y - gameobjects[i].topright_y,
-                            gameobjects[j].angle),
-                        gameobjects[j])
-                    or collision.point_collides_object_noangle(
-                        gameobjects[j].x + collision.rotate_x_coord(
-                            gameobjects[j].x - gameobjects[i].bottomright_x,
-                            gameobjects[j].y - gameobjects[i].bottomright_y,
-                            gameobjects[j].angle),
-                        gameobjects[j].y + collision.rotate_y_coord(
-                            gameobjects[j].x - gameobjects[i].bottomright_x,
-                            gameobjects[j].y - gameobjects[i].bottomright_y,
-                            gameobjects[j].angle),
-                        gameobjects[j])
-                then
-                    gameobjects[i].colliding = true
-                    gameobjects[j].colliding = true
-
-                    if math.abs((gameobjects[j].x_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].x_velocity + 1) * gameobjects[i].weight) then
-                        gameobjects[i].x = gameobjects[i].x +  ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (2 + gameobjects[i].x_velocity))
-                        gameobjects[i].x_velocity = 0
-                    else
-                        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (2 + gameobjects[j].x_velocity))
-                        gameobjects[j].x_velocity = 0
+                
+                if gameobjects[j].angle == 0 or gameobjects[j].angle == 3.14 then
+                    
+                    -- object j is not rotated at an angle
+                    -- it's cheap to check if any of i's corners are inside j
+                    if
+                        collision.are_unrotated_object_corners_colliding(i, j)
+                    then
+                        collision.register_collision(i, j)
                     end
+                else
 
-                    if math.abs((gameobjects[j].y_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].y_velocity + 1) * gameobjects[i].weight) then
-                        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (2 + gameobjects[i].y_velocity))
-                        gameobjects[i].x_velocity = 0
-                    else
-                        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (2 + gameobjects[j].y_velocity))
-                        gameobjects[j].y_velocity = 0
+                    -- object j is rotated at an angle
+                    -- we need to do a more computationally expensive process
+                    -- to find if any of i's corners are inside j
+                    if
+                        collision.are_rotated_object_corners_colliding(i, j)
+                    then
+                        collision.register_collision(i, j)
                     end
                 end
 
             end
         end
 
+    end
+
+end
+
+-- Please call this function whenever a collision has been detected between
+-- gameobjects of index i and j
+function collision.register_collision(i, j)
+
+    gameobjects[i].colliding = true
+    gameobjects[j].colliding = true
+
+    if math.abs((gameobjects[j].x_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].x_velocity + 1) * gameobjects[i].weight) then
+        gameobjects[i].x = gameobjects[i].x +  ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (2 + gameobjects[i].x_velocity))
+        gameobjects[i].x_velocity = 0
+    else
+        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (2 + gameobjects[j].x_velocity))
+        gameobjects[j].x_velocity = 0
+    end
+
+    if math.abs((gameobjects[j].y_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].y_velocity + 1) * gameobjects[i].weight) then
+        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (2 + gameobjects[i].y_velocity))
+        gameobjects[i].x_velocity = 0
+    else
+        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (2 + gameobjects[j].y_velocity))
+        gameobjects[j].y_velocity = 0
     end
 
 end
