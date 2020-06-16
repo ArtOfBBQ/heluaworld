@@ -49,18 +49,20 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
             file:write('map.background_tiles[' .. i .. '].image = "' .. map.background_tiles[i].image .. '"\n')
         end
     end
-
+    
     for i = 1, #gameobjects, 1 do
         if gameobjects[i].max_speed == 0 then
 
-            file:write('map.gameobjects[#map.gameobjects + 1] = {}\n')
-            file:write('map.gameobjects[#map.gameobjects].sprite_frame = "' .. gameobjects[i].sprite_frame .. '"\n')
-            file:write('map.gameobjects[#map.gameobjects].size_modifier = ' .. gameobjects[i].size_modifier .. '\n')
-            file:write('map.gameobjects[#map.gameobjects].x = ' .. gameobjects[i].x .. '\n')
-            file:write('map.gameobjects[#map.gameobjects].y = ' .. gameobjects[i].y .. '\n')
-            file:write('map.gameobjects[#map.gameobjects].weight = ' .. gameobjects[i].weight .. '\n')
-            file:write('map.gameobjects[#map.gameobjects].angle = ' .. gameobjects[i].angle .. '\n')
-        
+            file:write('gameobjects[#gameobjects + 1] = object:new()\n')
+            file:write('gameobjects[#gameobjects].sprite_frame = "' .. gameobjects[i].sprite_frame .. '"\n')
+            file:write('gameobjects[#gameobjects].size_modifier = ' .. gameobjects[i].size_modifier .. '\n')
+            file:write('gameobjects[#gameobjects].x = ' .. gameobjects[i].x .. '\n')
+            file:write('gameobjects[#gameobjects].y = ' .. gameobjects[i].y .. '\n')
+            file:write('gameobjects[#gameobjects].width = ' .. gameobjects[i].width .. '\n')
+            file:write('gameobjects[#gameobjects].height = ' .. gameobjects[i].height .. '\n')
+            file:write('gameobjects[#gameobjects].weight = ' .. gameobjects[i].weight .. '\n')
+            file:write('gameobjects[#gameobjects].angle = ' .. gameobjects[i].angle .. '\n')
+            
         end
     end
 

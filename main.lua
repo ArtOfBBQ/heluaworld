@@ -33,18 +33,6 @@ function love.load()
     gameobjects[1].weapon_angle = gameobjects[1].angle
     -- /to be removed later
 
-    if #map.gameobjects > 0 then
-        for i = 1, #map.gameobjects, 1 do
-            gameobjects[#gameobjects + 1] = object:new()
-            gameobjects[#gameobjects].max_speed = 0
-            gameobjects[#gameobjects].x = map.gameobjects[i].x
-            gameobjects[#gameobjects].y = map.gameobjects[i].y
-            gameobjects[#gameobjects].sprite_frame = map.gameobjects[i].sprite_frame
-            gameobjects[#gameobjects].size_modifier = map.gameobjects[i].size_modifier
-            gameobjects[#gameobjects].angle = map.gameobjects[i].angle
-        end
-    end
-    
     previous_time = os.clock()
 
 end
@@ -131,6 +119,7 @@ function love.update(dt)
     
     -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
+
         gameobjects[i]:decelerate(elapsed)
         gameobjects[i]:update_position(map.width, map.height)
 
@@ -185,13 +174,23 @@ function love.draw()
         assert(map.background_tiles[i] ~= nil)
         assert(map.background_tiles[i].image ~= nil)
 
+
+        local sprite_width = images[map.background_tiles[i].image]:getWidth() / 2
+        local sprite_height = images[map.background_tiles[i].image]:getHeight() / 2
+
+        if map.background_tiles[i].left > map.width - 50 then sprite_width = sprite_width + 20 end
+        if map.background_tiles[i].top > map.height - 50 then sprite_height = sprite_height + 20 end
+
+
         love.graphics.draw(
             images[map.background_tiles[i].image],
             camera.x_world_to_screen(map.background_tiles[i].left),
             camera.y_world_to_screen(map.background_tiles[i].top),
             0,
             camera.zoom,
-            camera.zoom
+            camera.zoom,
+            sprite_width,
+            sprite_height
         )
     end
     
