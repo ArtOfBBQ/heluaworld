@@ -9,14 +9,14 @@ camera = {
 
 function camera.x_screen_to_world(self, x_screen)
 
-    return (x_screen + self.left) / camera.zoom
+    return (x_screen / camera.zoom) + self.left
 
 end
 
 function camera.y_screen_to_world(self, y_screen)
 
-    return (y_screen + self.top) / camera.zoom
-
+    return (y_screen / camera.zoom) + self.top 
+    
 end
 
 function camera.x_world_to_screen(x_world)

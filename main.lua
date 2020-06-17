@@ -4,10 +4,11 @@ gameobjects = {}
 
 -- the time elapsed since the previous iteration of our game loop
 elapsed = 0
+
 local previous_time = os.clock()
 
 -- testing code, to be removed later
-local debug_mode = false
+local debug_mode = true
 local i_player = 1
 local clicked_x = 0
 local clicked_y = 0
@@ -18,6 +19,7 @@ local saved_text = ""
 function love.load()
 
     local object = require('modules.object')
+    local driver = require('modules.driver')
     local collision = require('modules.collision')
     local images = require('modules.imagefilenames')
     local camera = require('modules.camera')
@@ -28,9 +30,12 @@ function love.load()
     love.window.setTitle('Produce & Conquer')
     
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(1500, 1500)
+    gameobjects[1] = object:newbuggy(500, 1000)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
+    gameobjects[1].waypoints = {
+        {x = 600, y = 950}
+    }
     -- /to be removed later
 
     previous_time = os.clock()
@@ -55,18 +60,28 @@ function love.mousepressed(x, y, button, istouch)
 
     clicked_x = camera:x_screen_to_world(x)
     clicked_y = camera:y_screen_to_world(y)
-
-
+    
     if keyboard['pressingr'] then
         gameobjects[#gameobjects + 1] = object.newrock(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
     elseif keyboard['pressingt'] then 
         gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
     elseif keyboard['pressingm'] then
-        map:cycle_tile(
+        map:cycle_texture(
+            camera:x_screen_to_world(x),
+            camera:y_screen_to_world(y))
+    elseif keyboard['pressingn'] then
+        map:cycle_angle(
+            camera:x_screen_to_world(x),
+            camera:y_screen_to_world(y))
+    elseif keyboard['pressingb'] then
+        map:cycle_fit(
             camera:x_screen_to_world(x),
             camera:y_screen_to_world(y))
     else
-        if debug_mode == false then debug_mode = true else debug_mode = false end
+        -- if debug_mode == false then debug_mode = true else debug_mode = false end
+        gameobjects[i_player].waypoints[#gameobjects[i_player].waypoints + 1] = {
+            x = camera:x_screen_to_world(x),
+            y = camera:y_screen_to_world(y)}
     end
     
 end
@@ -120,43 +135,14 @@ function love.update(dt)
     -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
 
-        gameobjects[i]:decelerate(elapsed)
-        gameobjects[i]:update_position(map.width, map.height)
+        if gameobjects[i].max_speed ~= 0 then
+            gameobjects[i]:decelerate(elapsed)
+            gameobjects[i]:update_position(map.width, map.height)
+            driver.drive(gameobjects[i])
+            
+            gameobjects[i]:update_corner_coordinates()
 
-        -- this big code block updates the 4 vital coordinates of our rectangular object
-        -- given the center and the angle they're currently rotated at
-        gameobjects[i].topleft_x = gameobjects[i].x + collision.rotate_x_coord(
-            -gameobjects[i].width / 2,
-            -gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].topleft_y = gameobjects[i].y + collision.rotate_y_coord(
-            -gameobjects[i].width / 2,
-            -gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].topright_x = gameobjects[i].x + collision.rotate_x_coord(
-            gameobjects[i].width / 2,
-            -gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].topright_y = gameobjects[i].y + collision.rotate_y_coord(
-            gameobjects[i].width / 2,
-            -gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].bottomright_x = gameobjects[i].x + collision.rotate_x_coord(
-            gameobjects[i].width / 2,
-            gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].bottomright_y = gameobjects[i].y + collision.rotate_y_coord(
-            gameobjects[i].width / 2,
-            gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].bottomleft_x = gameobjects[i].x + collision.rotate_x_coord(
-            -gameobjects[i].width / 2,
-            gameobjects[i].height / 2,
-            gameobjects[i].angle)
-        gameobjects[i].bottomleft_y = gameobjects[i].y + collision.rotate_y_coord(
-            -gameobjects[i].width / 2,
-            gameobjects[i].height / 2,
-            gameobjects[i].angle)
+        end
         
         -- about to detect collisions so set to false 
         gameobjects[i].colliding = false
@@ -172,26 +158,22 @@ function love.draw()
     for i = 1, #map.background_tiles do
 
         assert(map.background_tiles[i] ~= nil)
-        assert(map.background_tiles[i].image ~= nil)
+        map.background_tiles[i].image = images.tile_to_filename(map.background_tiles[i])
 
-
-        local sprite_width = images[map.background_tiles[i].image]:getWidth() / 2
-        local sprite_height = images[map.background_tiles[i].image]:getHeight() / 2
-
-        if map.background_tiles[i].left > map.width - 50 then sprite_width = sprite_width + 20 end
-        if map.background_tiles[i].top > map.height - 50 then sprite_height = sprite_height + 20 end
-
-
-        love.graphics.draw(
-            images[map.background_tiles[i].image],
-            camera.x_world_to_screen(map.background_tiles[i].left),
-            camera.y_world_to_screen(map.background_tiles[i].top),
-            0,
-            camera.zoom,
-            camera.zoom,
-            sprite_width,
-            sprite_height
-        )
+        if images[map.background_tiles[i].image] ~= nil then
+            local sprite_width = images[map.background_tiles[i].image]:getWidth() / 2
+            local sprite_height = images[map.background_tiles[i].image]:getHeight() / 2
+            
+            love.graphics.draw(
+                images[map.background_tiles[i].image],
+                camera.x_world_to_screen(map.background_tiles[i].left),
+                camera.y_world_to_screen(map.background_tiles[i].top),
+                0,
+                camera.zoom,
+                camera.zoom,
+                sprite_width,
+                sprite_height)
+        end
     end
     
     for i = 1, #gameobjects, 1 do
@@ -264,11 +246,8 @@ function love.draw()
     love.graphics.print("x velocity: " .. math.floor(gameobjects[i_player].x_velocity * 100)/100, camera.width - 135, 50)
     love.graphics.print("y velocity: " .. math.floor(gameobjects[i_player].y_velocity * 100)/100, camera.width - 135, 70)
     love.graphics.print("angle: " .. math.floor(gameobjects[i_player].angle * 100) / 100, camera.width - 135, 90)
-    love.window.setTitle(gameobjects[i_player].angle)
     love.graphics.print("x (center): " .. math.floor(gameobjects[i_player].x), camera.width - 135, 110)
     love.graphics.print("y (center): " .. math.floor(gameobjects[i_player].y), camera.width - 135, 130)
-    love.graphics.print("elapsed: " .. math.floor(elapsed * 1000) / 1000, camera.width - 135, 150)
-    love.graphics.print("size modifier: " .. gameobjects[i_player].size_modifier, camera.width - 135, 170)
     love.graphics.print("width: " .. gameobjects[i_player].width, camera.width - 135, 190)
     love.graphics.print("height: " .. gameobjects[i_player].width, camera.width - 135, 210)
     love.graphics.print("camera left: " .. camera.left, camera.width - 135, 230)
@@ -280,5 +259,20 @@ function love.draw()
     love.graphics.print("last clicked x: " .. clicked_x, camera.width - 135, 350)
     love.graphics.print("last clicked y: " .. clicked_y, camera.width - 135, 370)
     love.graphics.print("file was: " .. saved_text, camera.width - 135, 390)
+    if gameobjects[i_player].waypoints ~= nil and #gameobjects[i_player].waypoints > 0 then
+        love.graphics.print("buggy goal angle: " .. driver.get_goal_angle(gameobjects[i_player]), camera.width - 135, 410)
+    end
+
+    love.graphics.setColor(0.1, 0.1, 1)
+    for i = 1, #gameobjects[i_player].waypoints, 1 do
+
+        love.graphics.circle(
+            "fill",
+            camera.x_world_to_screen(gameobjects[i_player].waypoints[i].x),
+            camera.y_world_to_screen(gameobjects[i_player].waypoints[i].y),
+            5)
+        
+    end
+    love.graphics.setColor(1, 1, 1)
 
 end

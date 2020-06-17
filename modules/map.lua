@@ -1,7 +1,6 @@
 map = require("maps.map1")
 
--- Flips one of the background tile images (grass, sand, etc.)
-function map.cycle_tile(self, x, y)
+function map.coords_to_tile(self, x, y)
 
     local tiles_per_row = math.ceil(self.width / 50)
     local tiles_per_col = math.ceil(self.height / 50)
@@ -10,31 +9,69 @@ function map.cycle_tile(self, x, y)
     local target_left = math.floor(x / 50)
     local target_top = math.floor(y / 50)
 
-    local i = 1 + (target_left * (tiles_per_col + 1)) + (target_top)
+    return 1 + (target_left * (tiles_per_col + 1)) + (target_top)
 
-    if self.background_tiles[i].image == "sand" then
-            self.background_tiles[i].image = "grass2"
-        elseif self.background_tiles[i].image == "grass2" then
-            self.background_tiles[i].image = "grass1"
-        elseif self.background_tiles[i].image == "grass1" then
-            self.background_tiles[i].image = "grassbeach1"
-        elseif self.background_tiles[i].image == "grassbeach1" then
-            self.background_tiles[i].image = "grassbeach2"
-        elseif self.background_tiles[i].image == "grassbeach2" then
-            self.background_tiles[i].image = "grassbeach3"
-        elseif self.background_tiles[i].image == "grassbeach3" then
-            self.background_tiles[i].image = "grassbeach4"
-        elseif self.background_tiles[i].image == "grassbeach4" then
-            self.background_tiles[i].image = "grassbeach5"
-        elseif self.background_tiles[i].image == "grassbeach5" then
-            self.background_tiles[i].image = "grassbeach6"
-        elseif self.background_tiles[i].image == "grassbeach6" then
-            self.background_tiles[i].image = "grassbeach7"
-        elseif self.background_tiles[i].image == "grassbeach7" then
-            self.background_tiles[i].image = "grassbeach8"
-        else
-            self.background_tiles[i].image = "sand"
+end
+
+function map.cycle_fit(self, x, y)
+
+    local i = map:coords_to_tile(x, y)
+
+    if self.background_tiles[i].fit == "straight" then
+            self.background_tiles[i].fit = "curve_in"
+        elseif self.background_tiles[i].fit == "curve_in" then
+            self.background_tiles[i].fit = "curve_out"
+        elseif self.background_tiles[i].fit == "curve_out" then
+            self.background_tiles[i].fit = "straight"
     end
+
+end
+
+function map.cycle_texture(self, x, y)
+
+    local i = map:coords_to_tile(x, y)
+
+    if self.background_tiles[i].texture == "grass" then
+            self.background_tiles[i].texture = "grassbeach"
+        elseif self.background_tiles[i].texture == "grassbeach" then
+            self.background_tiles[i].texture = "beach"
+        elseif self.background_tiles[i].texture == "beach" then
+            self.background_tiles[i].texture = "beachshallow"
+        elseif self.background_tiles[i].texture == "beachshallow" then
+            self.background_tiles[i].texture = "shallow"
+        elseif self.background_tiles[i].texture == "shallow" then
+            self.background_tiles[i].texture = "grass"
+    end
+
+end
+
+function map.cycle_angle(self, x, y)
+
+    local i = map:coords_to_tile(x, y)
+
+    if self.background_tiles[i].angle == "0" then
+        self.background_tiles[i].angle = "90"
+    elseif self.background_tiles[i].angle == "90" then
+        self.background_tiles[i].angle = "180"
+    elseif self.background_tiles[i].angle == "180" then
+        self.background_tiles[i].angle = "270"
+    else
+        self.background_tiles[i].angle = "0"
+    end
+
+end
+
+function map.cycle_variation(self, x, y)
+
+    local i = map:coords_to_tile(x, y)
+
+    if self.background_tiles[i].image ~= "grass" then
+        self.background_tiles[i].variation = 0
+    else
+        self.background_tiles[i].variation = self.background_tiles[i].variation + 1
+        if self.background_tiles[i].variation > 5 then self.background_tiles[i].variation = 0 end
+    end
+
 end
 
 function map.save_tiles_as_hardcode(self, filename, gameobjects)
@@ -46,10 +83,15 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
 
     for i = 1, #self.background_tiles, 1 do
         if map.background_tiles[i].image ~= "sand" then
-            file:write('map.background_tiles[' .. i .. '].image = "' .. map.background_tiles[i].image .. '"\n')
+            -- return tile.texture .. "_" .. tostring(tile.variation) .. "_" .. tile.fit .. "_0_" .. tile.angle
+
+            file:write('map.background_tiles[' .. i .. '].texture = "' .. map.background_tiles[i].texture .. '"\n')
+            file:write('map.background_tiles[' .. i .. '].variation = ' .. map.background_tiles[i].variation .. '\n')
+            file:write('map.background_tiles[' .. i .. '].fit = "' .. map.background_tiles[i].fit .. '"\n')
+            file:write('map.background_tiles[' .. i .. '].angle = "' .. map.background_tiles[i].angle .. '"\n')
         end
     end
-    
+
     for i = 1, #gameobjects, 1 do
         if gameobjects[i].max_speed == 0 then
 

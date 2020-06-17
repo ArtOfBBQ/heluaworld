@@ -16,7 +16,7 @@ object = {
     weight = 50,
     x_velocity = 0,
     y_velocity = 0,
-    max_speed_while_rotating = 0.75,
+    max_speed_while_rotating = 0.05,
     angle = 2,
     weapon_angle = nil,
     weapon_y_offset = 0,
@@ -24,7 +24,7 @@ object = {
     max_speed = 30,
     max_reverse_speed = 10,
     accel_speed = 0.2,
-    decel_speed = 0.1,
+    velocity_loss_pct = 0.005,
     reverse_accel_speed = 0.125,
     rotation_speed = 1.75,
     size_modifier = 1
@@ -94,28 +94,18 @@ end
 
 function object.decelerate(self, elapsed)
 
-    local increment = self.decel_speed * elapsed
-    local total_speed = math.abs(self.x_velocity) + math.abs(self.y_velocity)
-    
-    if self.x_velocity > 0 then
-        self.x_velocity = math.max(
-            self.x_velocity - math.abs((self.x_velocity / total_speed) * increment),
-            0)
+    if math.abs(self.x_velocity) < 0.00003 then
+        self.x_velocity = 0
     else
-        self.x_velocity = math.min(
-            self.x_velocity + math.abs((self.x_velocity / total_speed) * increment),
-            0)
+        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct))
     end
 
-    if self.y_velocity > 0 then
-        self.y_velocity = math.max(
-            self.y_velocity - math.abs((self.y_velocity / total_speed) * increment),
-            0)
+    if math.abs(self.y_velocity) < 0.00003 then
+        self.y_velocity = 0
     else
-        self.y_velocity = math.min(
-            self.y_velocity + math.abs((self.y_velocity / total_speed) * increment),
-            0)
+        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct))
     end
+
 end
 
 function object.reverse(self, elapsed)
@@ -130,8 +120,8 @@ end
 function object.update_position(self, map_width, map_height)
 
     if self.colliding == false then
-        self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width)
-        self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height)
+        self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width - (self.height / 4))
+        self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height - (self.height / 4))
     end
 
 end
@@ -147,6 +137,41 @@ function object.adjust_size(self, new_size_modifier)
 
 end
 
+function object.update_corner_coordinates(self)
+    self.topleft_x = self.x + collision.rotate_x_coord(
+        -self.width / 2,
+        -self.height / 2,
+        self.angle)
+    self.topleft_y = self.y + collision.rotate_y_coord(
+        -self.width / 2,
+        -self.height / 2,
+        self.angle)
+    self.topright_x = self.x + collision.rotate_x_coord(
+        self.width / 2,
+        -self.height / 2,
+        self.angle)
+    self.topright_y = self.y + collision.rotate_y_coord(
+        self.width / 2,
+        -self.height / 2,
+        self.angle)
+    self.bottomright_x = self.x + collision.rotate_x_coord(
+        self.width / 2,
+        self.height / 2,
+        self.angle)
+    self.bottomright_y = self.y + collision.rotate_y_coord(
+        self.width / 2,
+        self.height / 2,
+        self.angle)
+    self.bottomleft_x = self.x + collision.rotate_x_coord(
+        -self.width / 2,
+        self.height / 2,
+        self.angle)
+    self.bottomleft_y = self.y + collision.rotate_y_coord(
+        -self.width / 2,
+        self.height / 2,
+        self.angle)
+end
+
 function object:new(o)
 
     o = o or {}
@@ -156,6 +181,8 @@ function object:new(o)
 
     o.width = o.width * o.size_modifier
     o.height = o.height * o.size_modifier
+
+    o:update_corner_coordinates()
 
     return o
 end
@@ -168,10 +195,10 @@ function object:newtank(x, y)
     o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
-    o.max_speed = 20
-    o.max_reverse_speed = 5
-    o.accel_speed = 0.125
-    o.decel_speed = 0.1
+    o.max_speed = 1
+    o.max_reverse_speed = 0.75
+    o.accel_speed = 0.75
+    o.velocity_loss_pct = 0.005
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
     o.weapon_y_offset = 2
@@ -192,16 +219,16 @@ function object:newbuggy(x, y)
     o.y = y
     o.sprite_frame = 'buggy'
     o.sprite_top = 'buggygun'
-    o.max_speed = 30
-    o.max_reverse_speed = 15
+    o.max_speed = 2
+    o.max_reverse_speed = 1.5
     o.accel_speed = 1.5
-    o.decel_speed = 1.5
-    o.reverse_accel_speed = 1.5
+    o.velocity_loss_pct = 0.005
+    o.reverse_accel_speed = 1.25
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
     o.rotation_speed = 3
     o.weapon_y_offset = 8
-    o.max_speed_while_rotating = 50
+    o.max_speed_while_rotating = 2
 
     o.weight = 20
 
@@ -225,7 +252,7 @@ function object:newtree(x, y)
     o.max_speed = 0
     o.max_reverse_speed = 0
     o.accel_speed = 0
-    o.decel_speed = 0
+    o.velocity_loss_pct = 0
     o.angle = math.random() * 6.28
     o.size_modifier = 0.33 * ((1 + math.random()) / 1.5)
 
@@ -254,7 +281,7 @@ function object.newrock(x, y)
     o.max_speed = 0
     o.max_reverse_speed = 0
     o.accel_speed = 0
-    o.decel_speed = 0
+    o.velocity_loss_pct = 0
     o.angle = math.random() * 6.28
     o.size_modifier = 0.05 * (1 + 0.05)
 

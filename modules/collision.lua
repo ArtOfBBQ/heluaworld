@@ -19,18 +19,20 @@ function collision.rotate_x_around_point(x, y, angle, rtn_center_x, rtn_center_y
     y = y - rtn_center_y
 
     return (x * math.cos(angle)) - (y * math.sin(angle)) + rtn_center_x
+    
 end
 
 
 function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y)
-   
-    sinus   = math.sin(angle)
-    cosinus = math.cos(angle)
+    
+    local sinus   = math.sin(angle)
+    local cosinus = math.cos(angle)
 
     x = x - rtn_center_x
     y = y - rtn_center_y
 
     return (x * sinus) + (y * cosinus) + rtn_center_y
+
 end
 
 
@@ -58,6 +60,7 @@ function collision.point_collides_unrotated_object(x, y, object)
     end
 
     return true
+
 end
 
 -- are any of the corners of object i inside unrotated object j?
@@ -185,7 +188,7 @@ function collision.update_all_collisions()
             else
                 
                 if gameobjects[j].angle == 0 or gameobjects[j].angle == 3.14 then
-                    
+
                     -- object j is not rotated at an angle
                     -- it's cheap to check if any of i's corners are inside j
                     if
