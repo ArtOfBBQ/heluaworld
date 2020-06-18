@@ -18,6 +18,13 @@ function driver.drive(gameobject)
         assert(elapsed ~= nil)
 
         local goal_angle = driver.get_goal_angle(gameobject, #gameobject.waypoints)
+        local final_goal_angle = 0
+        if #gameobject.waypoints == 1 then
+            final_goal_angle = goal_angle
+        else
+            final_goal_angle = driver.get_goal_angle(gameobject, 1)
+        end
+
         local diff_to_goal_angle = gameobject.angle - goal_angle
 
         local want_to_decelerate = false
@@ -44,6 +51,14 @@ function driver.drive(gameobject)
             gameobject:rotate_left(elapsed)
         else
             gameobject:rotate_right(elapsed)
+        end
+
+        if final_goal_angle == gameobject.weapon_angle then
+            -- already at goal, do nothing
+        elseif math.abs(final_goal_angle - gameobject.weapon_angle) < 0.1 then
+            gameobject.weapon_angle = final_goal_angle
+        else
+            gameobject:rotate_weapon_left(elapsed)
         end
         
         if want_to_accelerate then
