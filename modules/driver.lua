@@ -11,12 +11,13 @@ function driver.drive(gameobject)
     assert(gameobject.y ~= nil)
     
     if gameobject["waypoints"] == nil or #gameobject.waypoints == 0 then
+        gameobject:decelerate(elapsed * 150)
         return
     else
 
         assert(elapsed ~= nil)
 
-        local goal_angle = driver.get_goal_angle(gameobject)
+        local goal_angle = driver.get_goal_angle(gameobject, #gameobject.waypoints)
         local diff_to_goal_angle = gameobject.angle - goal_angle
 
         local want_to_decelerate = false
@@ -58,37 +59,37 @@ function driver.drive(gameobject)
 end
 
 
-function driver.get_goal_angle(gameobject)
+function driver.get_goal_angle(gameobject, i_waypoint)
 
     assert(gameobject.y ~= nil)
     assert(gameobject.x ~= nil)
     assert(gameobject.waypoints ~= nil)
-    assert(gameobject.waypoints[#gameobject.waypoints].x ~= nil)
-    assert(gameobject.waypoints[#gameobject.waypoints].y ~= nil)
+    assert(gameobject.waypoints[i_waypoint].x ~= nil)
+    assert(gameobject.waypoints[i_waypoint].y ~= nil)
 
-    if (gameobject.waypoints[#gameobject.waypoints].y < gameobject.y
-        and gameobject.waypoints[#gameobject.waypoints].x > gameobject.x)
+    if (gameobject.waypoints[i_waypoint].y < gameobject.y
+        and gameobject.waypoints[i_waypoint].x > gameobject.x)
     then
         return 1.57 - math.atan(
-            math.abs(gameobject.waypoints[#gameobject.waypoints].y - gameobject.y) /
-            math.abs(gameobject.waypoints[#gameobject.waypoints].x - gameobject.x))
-    elseif (gameobject.waypoints[#gameobject.waypoints].y > gameobject.y
-        and gameobject.waypoints[#gameobject.waypoints].x > gameobject.x)
+            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
+            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
+    elseif (gameobject.waypoints[i_waypoint].y > gameobject.y
+        and gameobject.waypoints[i_waypoint].x > gameobject.x)
     then
         return 1.57 + math.atan(
-            math.abs(gameobject.waypoints[#gameobject.waypoints].y - gameobject.y) /
-            math.abs(gameobject.waypoints[#gameobject.waypoints].x - gameobject.x))
-    elseif (gameobject.waypoints[#gameobject.waypoints].y > gameobject.y
-        and gameobject.waypoints[#gameobject.waypoints].x < gameobject.x)
+            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
+            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
+    elseif (gameobject.waypoints[i_waypoint].y > gameobject.y
+        and gameobject.waypoints[i_waypoint].x < gameobject.x)
     then
         return 4.71 - math.atan(
-            math.abs(gameobject.waypoints[#gameobject.waypoints].y - gameobject.y) /
-            math.abs(gameobject.waypoints[#gameobject.waypoints].x - gameobject.x))
+            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
+            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
     end
 
     return 4.71 + math.atan(
-        math.abs(gameobject.waypoints[#gameobject.waypoints].y - gameobject.y) /
-        math.abs(gameobject.waypoints[#gameobject.waypoints].x - gameobject.x))
+        math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
+        math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
     
 end
 

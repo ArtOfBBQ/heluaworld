@@ -8,7 +8,7 @@ elapsed = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
-local debug_mode = false
+local debug_mode = true
 local i_player = 1
 local i_grabbing = nil
 local clicked_x = 0
@@ -25,16 +25,22 @@ function love.load()
     local images = require('modules.imagefilenames')
     local camera = require('modules.camera')
     local map = require('modules.map')
+    local pathfinding = require("modules.pathfinding")
     local keyboard = require('modules.keyboard')
 
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
     love.window.setTitle('Produce & Conquer')
     
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(500, 1000)
+    gameobjects[1] = object:newbuggy(500, 900)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     -- /to be removed later
+
+    for i = 1, #gameobjects, 1 do
+        gameobjects[i]:update_corner_coordinates()
+    end
+    pathfinding.update_map_tiles_contains_obstacle(map)
 
     previous_time = os.clock()
 
@@ -177,8 +183,6 @@ function love.draw()
         assert(map.background_tiles[i] ~= nil)
         map.background_tiles[i].image = images.tile_to_filename(map.background_tiles[i])
 
-
-
         if images[map.background_tiles[i].image] ~= nil then
             local sprite_width = images[map.background_tiles[i].image]:getWidth()
             local sprite_height = images[map.background_tiles[i].image]:getHeight()
@@ -196,14 +200,22 @@ function love.draw()
         end
 
         if debug_mode then 
-            love.graphics.setColor(0.5, 0.2, 0.2)
+
+            if map.background_tiles[i].contains_obstacle then
+                love.graphics.setColor(0.2, 0.2, 0.5)
+            else
+                love.graphics.setColor(0.5, 0.2, 0.2)
+            end
+
             love.graphics.rectangle(
                 "line",
                 camera.x_world_to_screen(map.background_tiles[i].left),
                 camera.y_world_to_screen(map.background_tiles[i].top),
                 map.background_tiles[i].width * camera.zoom,
                 map.background_tiles[i].height * camera.zoom)
+            
             love.graphics.setColor(1, 1, 1)
+
         end
     end
     

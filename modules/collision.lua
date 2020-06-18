@@ -35,6 +35,27 @@ function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y
 
 end
 
+function collision.point_collides_unrotated_rectangle(x, y, rect_left, rect_top, rect_width, rect_height)
+
+    if x < rect_left then
+        return false
+    end
+
+    if x > (rect_left + rect_width) then
+        return false
+    end
+
+    if y < rect_top then
+        return false
+    end
+
+    if y > (rect_top + rect_height) then
+        return false
+    end
+
+    return true
+
+end
 
 function collision.point_collides_unrotated_object(x, y, object)
 
@@ -43,23 +64,13 @@ function collision.point_collides_unrotated_object(x, y, object)
     -- unless the object happens to be at an angle of 0
     -- you need to fix rotation issues outside of it
 
-    if x < (object.x - (object.width / 2)) then
-        return false
-    end
-
-    if x > (object.x + (object.width / 2)) then
-        return false
-    end
-
-    if y < (object.y - (object.height / 2)) then
-        return false
-    end
-
-    if y > (object.y + (object.height / 2)) then
-        return false
-    end
-
-    return true
+    return collision.point_collides_unrotated_rectangle(
+        x,
+        y,
+        object.x - (object.width / 2),
+        object.y - (object.height / 2),
+        object.width,
+        object.height)
 
 end
 

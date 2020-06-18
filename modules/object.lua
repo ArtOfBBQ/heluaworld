@@ -97,13 +97,13 @@ function object.decelerate(self, elapsed)
     if math.abs(self.x_velocity) < 0.00003 then
         self.x_velocity = 0
     else
-        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct))
+        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
     end
 
     if math.abs(self.y_velocity) < 0.00003 then
         self.y_velocity = 0
     else
-        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct))
+        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
     end
 
 end
@@ -198,10 +198,11 @@ function object:newtank(x, y)
     o.max_speed = 0.5
     o.max_reverse_speed = 0.35
     o.accel_speed = 0.5
-    o.velocity_loss_pct = 0.005
+    o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
+    o.rotation_speed = 1
     o.weapon_y_offset = 2
     
     o.weight = 400
@@ -222,9 +223,9 @@ function object:newbuggy(x, y)
     o.sprite_top = 'buggygun'
     o.max_speed = 2
     o.max_reverse_speed = 1.6
-    o.accel_speed = 1.2
-    o.velocity_loss_pct = 0.005
-    o.reverse_accel_speed = 0.8
+    o.accel_speed = 1.5
+    o.velocity_loss_pct = 0.01
+    o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
     o.rotation_speed = 4

@@ -91,19 +91,20 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
             file:write('map.background_tiles[' .. i .. '].angle = "' .. map.background_tiles[i].angle .. '"\n')
         end
     end
-
+    
     for i = 1, #gameobjects, 1 do
         if gameobjects[i].max_speed == 0 then
 
             file:write('gameobjects[#gameobjects + 1] = object:new()\n')
             file:write('gameobjects[#gameobjects].sprite_frame = "' .. gameobjects[i].sprite_frame .. '"\n')
             file:write('gameobjects[#gameobjects].size_modifier = ' .. gameobjects[i].size_modifier .. '\n')
-            file:write('gameobjects[#gameobjects].x = ' .. math.round(gameobjects[i].x) .. '\n')
-            file:write('gameobjects[#gameobjects].y = ' .. math.round(gameobjects[i].y) .. '\n')
-            file:write('gameobjects[#gameobjects].width = ' .. math.round(gameobjects[i].width) .. '\n')
-            file:write('gameobjects[#gameobjects].height = ' .. math.round(gameobjects[i].height) .. '\n')
-            file:write('gameobjects[#gameobjects].weight = ' .. math.round(gameobjects[i].weight) .. '\n')
+            file:write('gameobjects[#gameobjects].x = ' .. math.floor(gameobjects[i].x) .. '\n')
+            file:write('gameobjects[#gameobjects].y = ' .. math.floor(gameobjects[i].y) .. '\n')
+            file:write('gameobjects[#gameobjects].width = ' .. math.floor(gameobjects[i].width) .. '\n')
+            file:write('gameobjects[#gameobjects].height = ' .. math.floor(gameobjects[i].height) .. '\n')
+            file:write('gameobjects[#gameobjects].weight = ' .. math.floor(gameobjects[i].weight) .. '\n')
             file:write('gameobjects[#gameobjects].angle = ' .. gameobjects[i].angle .. '\n')
+            file:write('gameobjects[#gameobjects].max_speed = 0\n')
             
         end
     end
