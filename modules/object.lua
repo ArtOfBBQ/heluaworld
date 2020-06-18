@@ -195,10 +195,11 @@ function object:newtank(x, y)
     o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
-    o.max_speed = 1
-    o.max_reverse_speed = 0.75
-    o.accel_speed = 0.75
+    o.max_speed = 0.5
+    o.max_reverse_speed = 0.35
+    o.accel_speed = 0.5
     o.velocity_loss_pct = 0.005
+    o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
     o.weapon_y_offset = 2
@@ -220,15 +221,15 @@ function object:newbuggy(x, y)
     o.sprite_frame = 'buggy'
     o.sprite_top = 'buggygun'
     o.max_speed = 2
-    o.max_reverse_speed = 1.5
-    o.accel_speed = 1.5
+    o.max_reverse_speed = 1.6
+    o.accel_speed = 1.2
     o.velocity_loss_pct = 0.005
-    o.reverse_accel_speed = 1.25
+    o.reverse_accel_speed = 0.8
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
-    o.rotation_speed = 3
+    o.rotation_speed = 4
     o.weapon_y_offset = 8
-    o.max_speed_while_rotating = 2
+    o.max_speed_while_rotating = 0.5
 
     o.weight = 20
 

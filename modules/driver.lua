@@ -22,21 +22,11 @@ function driver.drive(gameobject)
         local want_to_decelerate = false
         local want_to_accelerate = false
 
-        if math.abs(gameobject.x_velocity) > 0.25 or math.abs(gameobject.y_velocity) > 0.25 then
-            want_to_accelerate = false
-            want_to_decelerate = true
-        end
+        if math.abs(gameobject.x_velocity + gameobject.y_velocity) > 0.25 then want_to_decelerate = true end
 
-        if math.abs(diff_to_goal_angle) > gameobject.max_speed_while_rotating then
-            want_to_accelerate = false
-            want_to_decelerate = true
-        end
-
-        if math.abs(gameobject.x - gameobject.waypoints[#gameobject.waypoints].x) < 10 and
-            math.abs(gameobject.y - gameobject.waypoints[#gameobject.waypoints].y) < 10 then
-            
+        if math.abs(gameobject.x - gameobject.waypoints[#gameobject.waypoints].x) < ((gameobject.width + gameobject.height)/2) and
+            math.abs(gameobject.y - gameobject.waypoints[#gameobject.waypoints].y) < ((gameobject.width + gameobject.height)/2) then
             gameobject.waypoints[#gameobject.waypoints] = nil
-
         end
 
         if goal_angle == gameobject.angle then

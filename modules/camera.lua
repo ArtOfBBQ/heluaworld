@@ -53,7 +53,7 @@ end
 function camera.scroll_right(self, elapsed, map_width)
 
     assert(map_width ~= nil)
-    self.left = math.min(self.left + (self.speed * elapsed), map_width - (900 / self.zoom))
+    self.left = math.max(math.min(self.left + (self.speed * elapsed), map_width - (1000 / self.zoom)), 0)
 
 end
 
@@ -73,7 +73,7 @@ end
 function camera.scroll_down(self, elapsed, map_height)
 
     assert(map_height ~= nil)
-    self.top = math.min(self.top + (self.speed * elapsed), map_height - (900 / self.zoom))
+    self.top = math.max(math.min(self.top + (self.speed * elapsed), map_height - (1000 / self.zoom)), 0)
 
 end
 

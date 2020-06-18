@@ -260,33 +260,10 @@ function love.draw()
     end
 
     love.graphics.setColor(0.2, 0.25, 0)
-    assert(map.width ~= nil)
-    assert(camera.x_world_to_screen(map.width) ~= nil)
     love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
     love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
-
     love.graphics.setColor(1, 1, 1)
-    love.graphics.print("x velocity: " .. math.floor(gameobjects[i_player].x_velocity * 100)/100, camera.width - 135, 50)
-    love.graphics.print("y velocity: " .. math.floor(gameobjects[i_player].y_velocity * 100)/100, camera.width - 135, 70)
-    love.graphics.print("angle: " .. math.floor(gameobjects[i_player].angle * 100) / 100, camera.width - 135, 90)
-    love.graphics.print("x (center): " .. math.floor(gameobjects[i_player].x), camera.width - 135, 110)
-    love.graphics.print("y (center): " .. math.floor(gameobjects[i_player].y), camera.width - 135, 130)
-    love.graphics.print("width: " .. gameobjects[i_player].width, camera.width - 135, 190)
-    love.graphics.print("height: " .. gameobjects[i_player].width, camera.width - 135, 210)
-    love.graphics.print("camera left: " .. camera.left, camera.width - 135, 230)
-    love.graphics.print("camera top: " .. camera.top, camera.width - 135, 250)
-    love.graphics.print("last key: " .. keyboard.lastkeypressed, camera.width - 135, 270)
-    love.graphics.print("player colliding: " .. tostring(gameobjects[i_player].colliding), camera.width - 135, 290)
-    love.graphics.print("camera width: " .. camera.width, camera.width - 135, 310)
-    love.graphics.print("map width: " .. map.width, camera.width - 135, 330)
-    love.graphics.print("last clicked x: " .. clicked_x, camera.width - 135, 350)
-    love.graphics.print("last clicked y: " .. clicked_y, camera.width - 135, 370)
-    love.graphics.print("file was: " .. saved_text, camera.width - 135, 390)
-    if gameobjects[i_player].waypoints ~= nil and #gameobjects[i_player].waypoints > 0 then
-        love.graphics.print("buggy goal angle: " .. driver.get_goal_angle(gameobjects[i_player]), camera.width - 135, 410)
-    end
-    love.graphics.print("grabbed object: " .. tostring(i_grabbing), camera.width - 135, 430)
-
+    
     love.graphics.setColor(0.1, 0.1, 1)
     for i = 1, #gameobjects[i_player].waypoints, 1 do
 
