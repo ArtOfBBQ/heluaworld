@@ -4,7 +4,7 @@ camera = {
     left = 0,
     top = 0,
     speed = 1000,
-    zoom = 1,
+    zoom = 2,
     zoomspeed = 2}
 
 function camera.x_screen_to_world(self, x_screen)
@@ -30,23 +30,30 @@ end
 function camera.zoom_in(self, elapsed)
 
     self.zoom = self.zoom + (self.zoomspeed * elapsed)
-    self.left = self.left + (50 * self.zoomspeed * elapsed)
-    self.top = self.top + (50 * self.zoomspeed * elapsed)
+    if self.zoom > 2.5 then
+        self.zoom = 2.5
+    else
+        self.left = self.left + (10 * self.zoomspeed * elapsed)
+        self.top = self.top + (10 * self.zoomspeed * elapsed)
+    end
 
 end
 
 function camera.zoom_out(self, elapsed)
 
     self.zoom = self.zoom - (self.zoomspeed * elapsed)
-    self.left = self.left - (50 * self.zoomspeed * elapsed)
-    self.top = self.top - (50 * self.zoomspeed * elapsed)
+    if self.zoom < 0.65 then
+        self.zoom = 0.65
+        self.left = self.left - (10 * self.zoomspeed * elapsed)
+        self.top = self.top - (10 * self.zoomspeed * elapsed)
+    end
 
 end
 
 function camera.scroll_right(self, elapsed, map_width)
 
     assert(map_width ~= nil)
-    self.left = math.min(self.left + (self.speed * elapsed), map_width)
+    self.left = math.min(self.left + (self.speed * elapsed), map_width - (900 / self.zoom))
 
 end
 
@@ -66,7 +73,7 @@ end
 function camera.scroll_down(self, elapsed, map_height)
 
     assert(map_height ~= nil)
-    self.top = math.min(self.top + (self.speed * elapsed), map_height)
+    self.top = math.min(self.top + (self.speed * elapsed), map_height - (900 / self.zoom))
 
 end
 

@@ -202,13 +202,11 @@ function love.draw()
         assert(images[gameobjects[i].sprite_frame] ~= nil)
         love.graphics.draw(
             images[gameobjects[i].sprite_frame],
-            camera.x_world_to_screen(gameobjects[i].x),
-            camera.y_world_to_screen(gameobjects[i].y),
+            camera.x_world_to_screen(gameobjects[i].topleft_x),
+            camera.y_world_to_screen(gameobjects[i].topleft_y),
             gameobjects[i].angle,
             gameobjects[i].size_modifier * camera.zoom,
-            gameobjects[i].size_modifier * camera.zoom,
-            images[gameobjects[i].sprite_frame]:getWidth() / 2,
-            images[gameobjects[i].sprite_frame]:getHeight() / 2)
+            gameobjects[i].size_modifier * camera.zoom)
         
         if gameobjects[i]['weapon_angle'] ~= nil then
             love.graphics.draw(
@@ -260,7 +258,13 @@ function love.draw()
         -- end of debugging code
 
     end
-    
+
+    love.graphics.setColor(0.2, 0.25, 0)
+    assert(map.width ~= nil)
+    assert(camera.x_world_to_screen(map.width) ~= nil)
+    love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
+    love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
+
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("x velocity: " .. math.floor(gameobjects[i_player].x_velocity * 100)/100, camera.width - 135, 50)
     love.graphics.print("y velocity: " .. math.floor(gameobjects[i_player].y_velocity * 100)/100, camera.width - 135, 70)
@@ -282,7 +286,6 @@ function love.draw()
         love.graphics.print("buggy goal angle: " .. driver.get_goal_angle(gameobjects[i_player]), camera.width - 135, 410)
     end
     love.graphics.print("grabbed object: " .. tostring(i_grabbing), camera.width - 135, 430)
-
 
     love.graphics.setColor(0.1, 0.1, 1)
     for i = 1, #gameobjects[i_player].waypoints, 1 do
