@@ -4,7 +4,7 @@ camera = {
     left = 0,
     top = 0,
     speed = 1000,
-    zoom = 2,
+    zoom = 1,
     zoomspeed = 2}
 
 function camera.x_screen_to_world(self, x_screen)

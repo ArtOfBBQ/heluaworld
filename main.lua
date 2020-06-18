@@ -8,7 +8,7 @@ elapsed = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
-local debug_mode = true
+local debug_mode = false
 local i_player = 1
 local i_grabbing = nil
 local clicked_x = 0
@@ -34,9 +34,6 @@ function love.load()
     gameobjects[1] = object:newbuggy(500, 1000)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
-    gameobjects[1].waypoints = {
-        {x = 600, y = 950}
-    }
     -- /to be removed later
 
     previous_time = os.clock()
@@ -98,7 +95,8 @@ function love.mousepressed(x, y, button, istouch)
             camera:y_screen_to_world(y))
     else
         -- if debug_mode == false then debug_mode = true else debug_mode = false end
-        gameobjects[i_player].waypoints[#gameobjects[i_player].waypoints + 1] = {
+        if gameobjects[i_player]["waypoints"] == nil then gameobjects[i_player].waypoints = {} end
+        gameobjects[i_player].waypoints[(#gameobjects[i_player].waypoints or 0) + 1] = {
             x = camera:x_screen_to_world(x),
             y = camera:y_screen_to_world(y)}
     end
@@ -179,19 +177,33 @@ function love.draw()
         assert(map.background_tiles[i] ~= nil)
         map.background_tiles[i].image = images.tile_to_filename(map.background_tiles[i])
 
+
+
         if images[map.background_tiles[i].image] ~= nil then
-            local sprite_width = images[map.background_tiles[i].image]:getWidth() / 2
-            local sprite_height = images[map.background_tiles[i].image]:getHeight() / 2
+            local sprite_width = images[map.background_tiles[i].image]:getWidth()
+            local sprite_height = images[map.background_tiles[i].image]:getHeight()
             
             love.graphics.draw(
                 images[map.background_tiles[i].image],
+                camera.x_world_to_screen(map.background_tiles[i].left + (map.background_tiles[i].width / 2)),
+                camera.y_world_to_screen(map.background_tiles[i].top + (map.background_tiles[i].height / 2)),
+                0,
+                (map.background_tiles[i].width /sprite_width) * camera.zoom,
+                (map.background_tiles[i].height /sprite_height) * camera.zoom,
+                sprite_width / 2,
+                sprite_height / 2
+            )
+        end
+
+        if debug_mode then 
+            love.graphics.setColor(0.5, 0.2, 0.2)
+            love.graphics.rectangle(
+                "line",
                 camera.x_world_to_screen(map.background_tiles[i].left),
                 camera.y_world_to_screen(map.background_tiles[i].top),
-                0,
-                camera.zoom,
-                camera.zoom,
-                sprite_width,
-                sprite_height)
+                map.background_tiles[i].width * camera.zoom,
+                map.background_tiles[i].height * camera.zoom)
+            love.graphics.setColor(1, 1, 1)
         end
     end
     
@@ -259,21 +271,37 @@ function love.draw()
 
     end
 
+    -- greenish border at the edge of the screen
     love.graphics.setColor(0.2, 0.25, 0)
     love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
     love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
     love.graphics.setColor(1, 1, 1)
     
-    love.graphics.setColor(0.1, 0.1, 1)
-    for i = 1, #gameobjects[i_player].waypoints, 1 do
-
-        love.graphics.circle(
-            "fill",
-            camera.x_world_to_screen(gameobjects[i_player].waypoints[i].x),
-            camera.y_world_to_screen(gameobjects[i_player].waypoints[i].y),
-            5)
-        
+    -- if we're dragging a terrain piece, draw a red rectangle
+    if i_grabbing ~= nil then
+        love.graphics.setColor(0.4, 0.05, 0.05)
+        love.graphics.rectangle(
+            "line",
+            love.mouse.getX() - ((gameobjects[i_grabbing].width * camera.zoom) / 2),
+            love.mouse.getY() - ((gameobjects[i_grabbing].height * camera.zoom) / 2),
+            gameobjects[i_grabbing].width * camera.zoom,
+            gameobjects[i_grabbing].height  * camera.zoom)  
     end
-    love.graphics.setColor(1, 1, 1)
+    
+    -- blue points to represent the player's waypoints
+    -- this is temporary code for debugging only
+    if gameobjects[i_player]["waypoints"] ~= nil then
+        love.graphics.setColor(0.1, 0.1, 1)
+        for i = 1, #gameobjects[i_player].waypoints, 1 do
+
+            love.graphics.circle(
+                "fill",
+                camera.x_world_to_screen(gameobjects[i_player].waypoints[i].x),
+                camera.y_world_to_screen(gameobjects[i_player].waypoints[i].y),
+                5)
+            
+        end
+        love.graphics.setColor(1, 1, 1)
+    end
 
 end
