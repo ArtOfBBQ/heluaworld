@@ -10,6 +10,7 @@ local previous_time = os.clock()
 -- testing code, to be removed later
 local debug_mode = true
 local i_player = 1
+local i_grabbing = nil
 local clicked_x = 0
 local clicked_y = 0
 local saved_text = ""
@@ -60,10 +61,28 @@ function love.mousepressed(x, y, button, istouch)
 
     clicked_x = camera:x_screen_to_world(x)
     clicked_y = camera:y_screen_to_world(y)
-    
+
+    if i_grabbing == nil then
+        for i = 1, #gameobjects, 1 do
+            if collision.point_collides_rotated_object(
+                clicked_x,
+                clicked_y,
+                gameobjects[i]) then
+                    i_grabbing = i
+                    return
+            end
+        end
+    else
+        gameobjects[i_grabbing].x = clicked_x
+        gameobjects[i_grabbing].y = clicked_y
+        gameobjects[i_grabbing]:update_corner_coordinates()
+        i_grabbing = nil
+        return
+    end
+
     if keyboard['pressingr'] then
-        gameobjects[#gameobjects + 1] = object.newrock(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
-    elseif keyboard['pressingt'] then 
+        gameobjects[#gameobjects + 1] = object:newwall(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+    elseif keyboard['pressingt'] then
         gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
     elseif keyboard['pressingm'] then
         map:cycle_texture(
@@ -262,6 +281,8 @@ function love.draw()
     if gameobjects[i_player].waypoints ~= nil and #gameobjects[i_player].waypoints > 0 then
         love.graphics.print("buggy goal angle: " .. driver.get_goal_angle(gameobjects[i_player]), camera.width - 135, 410)
     end
+    love.graphics.print("grabbed object: " .. tostring(i_grabbing), camera.width - 135, 430)
+
 
     love.graphics.setColor(0.1, 0.1, 1)
     for i = 1, #gameobjects[i_player].waypoints, 1 do

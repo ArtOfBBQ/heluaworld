@@ -238,6 +238,31 @@ function object:newbuggy(x, y)
     return o
 end
 
+function object:newwall(x, y)
+
+    o = object:new()
+
+    o.x = x
+    o.y = y
+    o.sprite_frame = "wall1"
+    o.sprite_top = nil
+    o.max_speed = 0
+    o.max_reverse_speed = 0
+    o.accel_speed = 0
+    o.velocity_loss_pct = 0
+    o.angle = 0
+    o.size_modifier = 0.25
+
+    o.weight = 800
+
+    o.width = 533 * o.size_modifier
+    o.height = 111 * o.size_modifier
+
+    o:update_corner_coordinates()
+
+    return o
+
+end
 
 local tree_images = {'tree1', 'tree2', 'tree3', 'tree4', 'tree5', 'tree6', 'tree7', 'tree8', 'tree9'}
 
@@ -260,6 +285,8 @@ function object:newtree(x, y)
 
     o.width = 128 * o.size_modifier
     o.height = 128 * o.size_modifier
+
+    o:update_corner_coordinates()
 
     return o
 end

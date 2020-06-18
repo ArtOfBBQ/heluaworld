@@ -17,6 +17,8 @@ images.tree9 = love.graphics.newImage("assets/images/terrain/tree9.png")
 
 images.rock1 = love.graphics.newImage("assets/images/terrain/rock1.png")
 
+images.wall1 = love.graphics.newImage("assets/images/terrain/wall1.png")
+
 images.grass_0_straight_0_0 = love.graphics.newImage("assets/images/terrain/tiles/grass0/straight/0/0.png")
 images.grass_0_straight_0_90 = love.graphics.newImage("assets/images/terrain/tiles/grass0/straight/90/0.png")
 images.grass_0_straight_0_180 = love.graphics.newImage("assets/images/terrain/tiles/grass0/straight/180/0.png")

@@ -63,6 +63,21 @@ function collision.point_collides_unrotated_object(x, y, object)
 
 end
 
+function collision.point_collides_rotated_object(x, y, gameobject)
+
+    return collision.point_collides_unrotated_object(
+        gameobject.x + collision.rotate_x_coord(
+            gameobject.x - x,
+            gameobject.y - y,
+            gameobject.angle),
+        gameobject.y + collision.rotate_y_coord(
+            gameobject.x - x,
+            gameobject.y - y,
+            gameobject.angle),
+        gameobject)
+
+end
+
 -- are any of the corners of object i inside unrotated object j?
 -- object j must be an 'unrotated' rectangle
 -- so the edges of the rectangle must be parallel with the screen
@@ -107,6 +122,7 @@ function collision.are_unrotated_object_corners_colliding(i, j)
 
 end
 
+
 -- are any of the corners of object i inside rotated object j?
 -- this function also works if object j isn't rotated, but it's very expensive
 --
@@ -115,62 +131,38 @@ end
 -- function would still return false
 function collision.are_rotated_object_corners_colliding(i, j)
 
-    if collision.point_collides_unrotated_object(
-        gameobjects[j].x + collision.rotate_x_coord(
-            gameobjects[j].x - gameobjects[i].bottomleft_x,
-            gameobjects[j].y - gameobjects[i].bottomleft_y,
-            gameobjects[j].angle),
-        gameobjects[j].y + collision.rotate_y_coord(
-            gameobjects[j].x - gameobjects[i].bottomleft_x,
-            gameobjects[j].y - gameobjects[i].bottomleft_y,
-            gameobjects[j].angle),
+    if collision.point_collides_rotated_object(
+        gameobjects[i].bottomleft_x,
+        gameobjects[i].bottomleft_y,
         gameobjects[j])
     then
         return true
     end
-
-    if collision.point_collides_unrotated_object(
-        gameobjects[j].x + collision.rotate_x_coord(
-            gameobjects[j].x - gameobjects[i].topleft_x,
-            gameobjects[j].y - gameobjects[i].topleft_y,
-            gameobjects[j].angle),
-        gameobjects[j].y + collision.rotate_y_coord(
-            gameobjects[j].x - gameobjects[i].topleft_x,
-            gameobjects[j].y - gameobjects[i].topleft_y,
-            gameobjects[j].angle),
+    
+    if collision.point_collides_rotated_object(
+        gameobjects[i].topleft_x,
+        gameobjects[i].topleft_y,
         gameobjects[j])
     then
         return true
     end
-
-    if collision.point_collides_unrotated_object(
-        gameobjects[j].x + collision.rotate_x_coord(
-            gameobjects[j].x - gameobjects[i].topright_x,
-            gameobjects[j].y - gameobjects[i].topright_y,
-            gameobjects[j].angle),
-        gameobjects[j].y + collision.rotate_y_coord(
-            gameobjects[j].x - gameobjects[i].topright_x,
-            gameobjects[j].y - gameobjects[i].topright_y,
-            gameobjects[j].angle),
+    
+    if collision.point_collides_rotated_object(
+        gameobjects[i].topright_x,
+        gameobjects[i].topright_y,
         gameobjects[j])
     then
         return true
     end
-
-    if collision.point_collides_unrotated_object(
-        gameobjects[j].x + collision.rotate_x_coord(
-            gameobjects[j].x - gameobjects[i].bottomright_x,
-            gameobjects[j].y - gameobjects[i].bottomright_y,
-            gameobjects[j].angle),
-        gameobjects[j].y + collision.rotate_y_coord(
-            gameobjects[j].x - gameobjects[i].bottomright_x,
-            gameobjects[j].y - gameobjects[i].bottomright_y,
-            gameobjects[j].angle),
+    
+    if collision.point_collides_rotated_object(
+        gameobjects[i].bottomright_x,
+        gameobjects[i].bottomright_y,
         gameobjects[j])
     then
         return true
     end
-
+    
     return false
 
 end
@@ -239,5 +231,6 @@ function collision.register_collision(i, j)
     end
 
 end
+
 
 return collision
