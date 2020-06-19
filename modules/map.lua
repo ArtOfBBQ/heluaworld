@@ -2,14 +2,13 @@ map = require("maps.map1")
 
 function map.coords_to_tile(self, x, y)
 
-    local tiles_per_row = math.ceil(self.width / 50)
-    local tiles_per_col = math.ceil(self.height / 50)
-    assert(tiles_per_col == 30)
+    local tiles_per_row = math.ceil(self.width / map.tile_width)
+    local tiles_per_col = math.ceil(self.height / map.tile_height)
 
-    local target_left = math.floor(x / 50)
-    local target_top = math.floor(y / 50)
+    local target_left = math.floor(x / map.tile_width)
+    local target_top = math.floor(y / map.tile_height)
 
-    return 1 + (target_left * (tiles_per_col + 1)) + (target_top)
+    return 1 + (target_left * (tiles_per_col)) + (target_top)
 
 end
 
@@ -82,7 +81,8 @@ function map.save_tiles_as_hardcode(self, filename, gameobjects)
     assert(file ~= nil)
 
     for i = 1, #self.background_tiles, 1 do
-        if map.background_tiles[i].image ~= "sand" then
+        if map.background_tiles[i].left - map.background_tiles[i].width < map.width
+            and map.background_tiles[i].top - map.background_tiles[i].height < map.height then
             -- return tile.texture .. "_" .. tostring(tile.variation) .. "_" .. tile.fit .. "_0_" .. tile.angle
 
             file:write('map.background_tiles[' .. i .. '].texture = "' .. map.background_tiles[i].texture .. '"\n')

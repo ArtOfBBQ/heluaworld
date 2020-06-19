@@ -10,11 +10,6 @@ end
 
 function collision.rotate_x_around_point(x, y, angle, rtn_center_x, rtn_center_y)
 
-    assert(x ~= nil)
-    assert(y ~= nil)
-    assert(rtn_center_x ~= nil)
-    assert(rtn_center_y ~= nil)
-
     x = x - rtn_center_x
     y = y - rtn_center_y
 
