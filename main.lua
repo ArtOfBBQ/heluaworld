@@ -8,12 +8,11 @@ elapsed = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
-local debug_mode = true
+local debug_mode = false
 local i_player = 1
 local i_grabbing = nil
 local clicked_x = 0
 local clicked_y = 0
-local saved_text = ""
 -- /to be removed later
 
 
@@ -32,7 +31,7 @@ function love.load()
     love.window.setTitle("Build & conquer")
     
     -- testing code, to be removed later
-    gameobjects[1] = object:newtank(500, 900)
+    gameobjects[1] = object:newbuggy(500, 900)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     -- /to be removed later
@@ -101,10 +100,13 @@ function love.mousepressed(x, y, button, istouch)
             camera:y_screen_to_world(y))
     else
         -- if debug_mode == false then debug_mode = true else debug_mode = false end
-        if gameobjects[i_player]["waypoints"] == nil then gameobjects[i_player].waypoints = {} end
-        gameobjects[i_player].waypoints[(#gameobjects[i_player].waypoints or 0) + 1] = {
-            x = camera:x_screen_to_world(x),
-            y = camera:y_screen_to_world(y)}
+        local clicked_tile = map:coords_to_tile(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+        if map.background_tiles[clicked_tile].contains_obstacle == false then
+            pathfinding.fill_waypoints(
+                gameobjects[i_player],
+                map.background_tiles[clicked_tile].left + (map.background_tiles[clicked_tile].width / 2),
+                map.background_tiles[clicked_tile].top + (map.background_tiles[clicked_tile].height / 2))
+        end
     end
     
 end
@@ -164,7 +166,6 @@ function love.update(dt)
             driver.drive(gameobjects[i])
             
             gameobjects[i]:update_corner_coordinates()
-
         end
         
         -- about to detect collisions so set to false 
@@ -284,10 +285,10 @@ function love.draw()
     end
 
     -- greenish border at the edge of the screen
-    love.graphics.setColor(0.2, 0.25, 0)
-    love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
-    love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
-    love.graphics.setColor(1, 1, 1)
+    -- love.graphics.setColor(0.2, 0.25, 0)
+    -- love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
+    -- love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
+    -- love.graphics.setColor(1, 1, 1)
     
     -- if we're dragging a terrain piece, draw a red rectangle
     if i_grabbing ~= nil then
@@ -315,5 +316,7 @@ function love.draw()
         end
         love.graphics.setColor(1, 1, 1)
     end
+
+    love.graphics.setColor(1, 1, 1)    
 
 end
