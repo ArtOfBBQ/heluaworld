@@ -229,10 +229,10 @@ function pathfinding.fill_waypoints(gameobject, target_x, target_y)
     open_nodes[1].fcost = open_nodes[1].gcost + open_nodes[1].hcost
     
     closed_nodes  = {}
-
+    
     repeat
         pathfinding.single_astar_step(gameobject, target_x, target_y)
-    until #closed_nodes > 50000 or #open_nodes < 1 or #gameobject.waypoints > 0
+    until #closed_nodes > 100000 or #open_nodes < 1 or #gameobject.waypoints > 0
 
 end
 

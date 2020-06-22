@@ -31,7 +31,7 @@ function love.load()
     love.window.setTitle("Build & conquer")
     
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(500, 900)
+    gameobjects[1] = object:newtank(500, 900)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     -- /to be removed later

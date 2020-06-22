@@ -17,12 +17,16 @@ function driver.drive(gameobject)
 
         assert(elapsed ~= nil)
 
-        local goal_angle = driver.get_goal_angle(gameobject, #gameobject.waypoints)
+        local goal_angle = driver.get_goal_angle(
+            gameobject.x, gameobject.y,
+            gameobject.waypoints[#gameobject.waypoints].x, gameobject.waypoints[#gameobject.waypoints].y)
         local final_goal_angle = 0
         if #gameobject.waypoints == 1 then
             final_goal_angle = goal_angle
         else
-            final_goal_angle = driver.get_goal_angle(gameobject, 1)
+            final_goal_angle = driver.get_goal_angle(
+                gameobject.x, gameobject.y,
+                gameobject.waypoints[1].x, gameobject.waypoints[1].y)
         end
 
         local diff_to_goal_angle = gameobject.angle - goal_angle
@@ -53,12 +57,23 @@ function driver.drive(gameobject)
             gameobject:rotate_right(elapsed)
         end
 
+        local weapon_goal_angle = 0
+        if #gameobject.waypoints > 0 then
+            weapon_goal_angle = driver.get_goal_angle(
+                gameobject.x, gameobject.y,
+                gameobject.waypoints[1].x, gameobject.waypoints[1].y)
+        end
+        local weapon_diff_to_goal_angle = gameobject.weapon_angle - weapon_goal_angle
         if final_goal_angle == gameobject.weapon_angle then
             -- already at goal, do nothing
-        elseif math.abs(final_goal_angle - gameobject.weapon_angle) < 0.1 then
+        elseif math.abs(final_goal_angle - gameobject.weapon_angle) < 0.05 then
             gameobject.weapon_angle = final_goal_angle
-        else
+        elseif math.abs(weapon_diff_to_goal_angle) > 3.13 and weapon_diff_to_goal_angle < 0 then
             gameobject:rotate_weapon_left(elapsed)
+        elseif math.abs(weapon_diff_to_goal_angle) < 3.13 and weapon_diff_to_goal_angle > 0 then
+            gameobject:rotate_weapon_left(elapsed)
+        else
+            gameobject:rotate_weapon_right(elapsed)
         end
         
         if want_to_accelerate then
@@ -74,37 +89,36 @@ function driver.drive(gameobject)
 end
 
 
-function driver.get_goal_angle(gameobject, i_waypoint)
+function driver.get_goal_angle(cur_x, cur_y, target_x, target_y)
 
-    assert(gameobject.y ~= nil)
-    assert(gameobject.x ~= nil)
-    assert(gameobject.waypoints ~= nil)
-    assert(gameobject.waypoints[i_waypoint].x ~= nil)
-    assert(gameobject.waypoints[i_waypoint].y ~= nil)
+    assert(cur_y ~= nil)
+    assert(cur_x ~= nil)
+    assert(target_x ~= nil)
+    assert(target_y ~= nil)
 
-    if (gameobject.waypoints[i_waypoint].y < gameobject.y
-        and gameobject.waypoints[i_waypoint].x > gameobject.x)
+    if (target_y < cur_y
+        and target_x > cur_x)
     then
         return 1.57 - math.atan(
-            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
-            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
-    elseif (gameobject.waypoints[i_waypoint].y > gameobject.y
-        and gameobject.waypoints[i_waypoint].x > gameobject.x)
+            math.abs(target_y - cur_y) /
+            math.abs(target_x - cur_x))
+    elseif (target_y > cur_y
+        and target_x > cur_x)
     then
         return 1.57 + math.atan(
-            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
-            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
-    elseif (gameobject.waypoints[i_waypoint].y > gameobject.y
-        and gameobject.waypoints[i_waypoint].x < gameobject.x)
+            math.abs(target_y - cur_y) /
+            math.abs(target_x - cur_x))
+    elseif (target_y > cur_y
+        and target_x < cur_x)
     then
         return 4.71 - math.atan(
-            math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
-            math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
+            math.abs(target_y - cur_y) /
+            math.abs(target_x - cur_x))
     end
 
     return 4.71 + math.atan(
-        math.abs(gameobject.waypoints[i_waypoint].y - gameobject.y) /
-        math.abs(gameobject.waypoints[i_waypoint].x - gameobject.x))
+        math.abs(target_y - cur_y) /
+        math.abs(target_x - cur_x))
     
 end
 
