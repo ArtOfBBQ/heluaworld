@@ -119,17 +119,15 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
             end
 
-        end     
+        end
 
     end 
 
 end
 
--- Given an index in map.background_tiles, return a table
--- with each index of the neighboring tiles
-function pathfinding.get_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
+function pathfinding.get_direct_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
 
-    return_values = {}
+    local return_values = {}
 
     local is_in_row_one = (i_tile % tiles_per_col) == 1
     local is_in_col_one = i_tile <= tiles_per_row
@@ -143,17 +141,31 @@ function pathfinding.get_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_
     -- directly above
     if is_in_row_one == false then return_values[#return_values + 1] = i_tile - 1 end
 
-    -- left above
-    if is_in_col_one == false and is_in_row_one == false then return_values[#return_values + 1] = i_tile - tiles_per_col - 1 end
-
     -- directly to the right
     if is_in_final_col == false then return_values[#return_values + 1] = i_tile + tiles_per_row end
 
-    -- right above
-    if is_in_final_col == false and is_in_row_one == false then return_values[#return_values + 1] = i_tile + tiles_per_col - 1 end
-
     -- directly below
     if is_in_final_row == false then return_values[#return_values + 1] = i_tile + 1 end
+
+    return return_values
+
+end
+
+function pathfinding.get_diagonal_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
+
+    local return_values = {}
+
+    local is_in_row_one = (i_tile % tiles_per_col) == 1
+    local is_in_col_one = i_tile <= tiles_per_row
+
+    local is_in_final_col = i_tile >= ((tiles_per_row * tiles_per_col) - tiles_per_col)
+    local is_in_final_row = i_tile % tiles_per_col == 0
+
+    -- left above
+    if is_in_col_one == false and is_in_row_one == false then return_values[#return_values + 1] = i_tile - tiles_per_col - 1 end
+
+    -- right above
+    if is_in_final_col == false and is_in_row_one == false then return_values[#return_values + 1] = i_tile + tiles_per_col - 1 end
 
     -- left below
     if is_in_final_row == false and is_in_col_one == false then return_values[#return_values + 1] = i_tile - tiles_per_col + 1 end
@@ -162,6 +174,22 @@ function pathfinding.get_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_
     if is_in_final_row == false and is_in_final_col == false then return_values[#return_values + 1] = i_tile + tiles_per_row + 1 end
 
     return return_values
+
+end
+
+-- Given an index in map.background_tiles, return a table
+-- with each index of the neighboring tiles
+function pathfinding.get_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
+
+    local straight = pathfinding.get_direct_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
+
+    local diagonal = pathfinding.get_diagonal_neighbor_tile_indexes(i_tile, tiles_per_row, tiles_per_col)
+
+    for i = 1, #diagonal, 1 do
+        straight[#straight + 1] = diagonal[i]
+    end
+
+    return straight
 
 end
 
@@ -232,7 +260,7 @@ function pathfinding.fill_waypoints(gameobject, target_x, target_y)
     
     repeat
         pathfinding.single_astar_step(gameobject, target_x, target_y)
-    until #closed_nodes > 100000 or #open_nodes < 1 or #gameobject.waypoints > 0
+    until #closed_nodes > 1000000 or #open_nodes < 1 or #gameobject.waypoints > 0
 
 end
 
@@ -261,10 +289,23 @@ function pathfinding.single_astar_step(gameobject, target_x, target_y)
             end
             return
     end
-    
-    neighboring_nodes = pathfinding.get_neighbor_tile_indexes(
+
+    local direct_neighbors_contain_obstacle = false
+    local direct_neighbors = pathfinding.get_direct_neighbor_tile_indexes(
         closed_nodes[i_cur_tile].i_tile, map.width / map.tile_width, map.height / map.tile_height)
+    for i = 1, #direct_neighbors, 1 do
+        if map.background_tiles[direct_neighbors[i]].contains_obstacle then
+            direct_neighbors_contain_obstacle = true
+        end
+    end
     
+    if direct_neighbors_contain_obstacle then
+        neighboring_nodes = direct_neighbors
+    else
+        neighboring_nodes = pathfinding.get_neighbor_tile_indexes(
+            closed_nodes[i_cur_tile].i_tile, map.width / map.tile_width, map.height / map.tile_height)
+    end
+        
     -- make sure the neighbor is eligible
     -- 1. it can't contain an obstacle
     local i = #neighboring_nodes
@@ -276,8 +317,16 @@ function pathfinding.single_astar_step(gameobject, target_x, target_y)
         i = i - 1
     until i == 0
 
+    -- 2. It can't, if we're moving diagonally, be surrounded by obstacles
+    -- if T is target, N is neighbor, and O is obstacle,
+    --
+    -- T O
+    -- O N
+    -- The above is a bad pattern, because moving from N to T will probably be impossible
 
-    -- 2. it can't be in closed_nodes (already evaluated)
+
+
+    -- 3. it can't be in closed_nodes (already evaluated)
     local i = #neighboring_nodes
     repeat
         assert(neighboring_nodes[i] ~= nil, "i was: " .. i .. ", #neighboring_nodes was: ".. #neighboring_nodes)
