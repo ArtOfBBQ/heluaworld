@@ -1,30 +1,26 @@
-map = {
-    width = 1500,
-    height = 1500,
-    background_tiles = {},
-}
+map = {width = 1500, height = 1500, background_tiles = {}}
 
 map.tile_width = 50
 map.tile_height = 50
 
 for i = 0, map.width - map.tile_width, map.tile_width do
     for j = 0, map.height - map.tile_height, map.tile_height do
-        
+
         local cur_image = "grass_0_straight_0_0"
-        
-        map.background_tiles[#map.background_tiles + 1] = 
-        {
-            left = i,
-            top = j,
-            width = map.tile_width,
-            height = map.tile_height,
-            texture = "grass",
-            variation = 0,
-            fit = "straight",
-            angle = "0",
-            image = cur_image,
-            contains_obstacle = false
-        }
+
+        map.background_tiles[#map.background_tiles + 1] =
+            {
+                left = i,
+                top = j,
+                width = map.tile_width,
+                height = map.tile_height,
+                texture = "grass",
+                variation = 0,
+                fit = "straight",
+                angle = "0",
+                image = cur_image,
+                contains_obstacle = false
+            }
 
     end
 end

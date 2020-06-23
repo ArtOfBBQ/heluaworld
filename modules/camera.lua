@@ -5,18 +5,15 @@ camera = {
     top = 0,
     speed = 1000,
     zoom = 1,
-    zoomspeed = 2}
+    zoomspeed = 2
+}
 
 function camera.x_screen_to_world(self, x_screen)
-
     return (x_screen / camera.zoom) + self.left
-
 end
 
 function camera.y_screen_to_world(self, y_screen)
-
-    return (y_screen / camera.zoom) + self.top 
-    
+    return (y_screen / camera.zoom) + self.top
 end
 
 function camera.x_world_to_screen(x_world)
@@ -28,7 +25,6 @@ function camera.y_world_to_screen(y_world)
 end
 
 function camera.zoom_in(self, elapsed)
-
     self.zoom = self.zoom + (self.zoomspeed * elapsed)
     if self.zoom > 2.5 then
         self.zoom = 2.5
@@ -36,43 +32,34 @@ function camera.zoom_in(self, elapsed)
         self.left = self.left + (10 * self.zoomspeed * elapsed)
         self.top = self.top + (10 * self.zoomspeed * elapsed)
     end
-
 end
 
 function camera.zoom_out(self, elapsed)
-
     self.zoom = self.zoom - (self.zoomspeed * elapsed)
     if self.zoom < 0.65 then
         self.zoom = 0.65
         self.left = self.left - (10 * self.zoomspeed * elapsed)
         self.top = self.top - (10 * self.zoomspeed * elapsed)
     end
-
 end
 
 function camera.scroll_right(self, elapsed, map_width)
-
-    self.left = math.max(math.min(self.left + (self.speed * elapsed), map_width + 5 - (camera.width / self.zoom)), 0)
-
+    self.left = math.max(math.min(self.left + (self.speed * elapsed),
+                                  map_width + 5 - (camera.width / self.zoom)), 0)
 end
 
 function camera.scroll_left(self, elapsed)
-
     self.left = math.max(self.left - (self.speed * elapsed), 0)
-
 end
 
 function camera.scroll_up(self, elapsed)
-
     self.top = math.max(self.top - (self.speed * elapsed), 0)
-
 end
 
 function camera.scroll_down(self, elapsed, map_height)
-
-    self.top = math.max(math.min(self.top + (self.speed * elapsed), map_height + 5 - (camera.height / self.zoom)), 0)
-
+    self.top = math.max(math.min(self.top + (self.speed * elapsed),
+                                 map_height + 5 - (camera.height / self.zoom)),
+                        0)
 end
-
 
 return camera

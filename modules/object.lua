@@ -31,151 +31,133 @@ object = {
 }
 
 function object.fix_radians_bounds(self, angle_property_name)
-
     if self[angle_property_name] == nil then return end
-
-    if self[angle_property_name] < 0 then self[angle_property_name] = self[angle_property_name] + 6.28318 end
-    if self[angle_property_name] > 6.28319 then self[angle_property_name] = self[angle_property_name] - 6.28319 end
-
+    if self[angle_property_name] < 0 then
+        self[angle_property_name] = self[angle_property_name] + 6.28318
+    end
+    if self[angle_property_name] > 6.28319 then
+        self[angle_property_name] = self[angle_property_name] - 6.28319
+    end
 end
 
 function object.rotate_left(self, elapsed)
-    
     local increment = self.rotation_speed * elapsed
 
     self.angle = self.angle - increment
-    if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
+    if self['weapon_angle'] ~= nil then
+        self.weapon_angle = self.weapon_angle - increment
+    end
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
-
 end
 
 function object.rotate_right(self, elapsed)
-    
     local increment = self.rotation_speed * elapsed
 
     self.angle = self.angle + increment
-    if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
+    if self['weapon_angle'] ~= nil then
+        self.weapon_angle = self.weapon_angle + increment
+    end
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
-
 end
 
 function object.rotate_weapon_left(self, elapsed)
-    
     local increment = self.rotation_speed * elapsed
-
     self.weapon_angle = self.weapon_angle - increment
-
     self:fix_radians_bounds('weapon_angle')
-
 end
 
 function object.rotate_weapon_right(self, elapsed)
-    
     local increment = self.rotation_speed * elapsed
-
     self.weapon_angle = self.weapon_angle + increment
-
     self:fix_radians_bounds('weapon_angle')
-
 end
 
 function object.accelerate(self, elapsed)
-
     local increment = self.accel_speed * elapsed
-    
     self.x_velocity = self.x_velocity + (math.sin(self.angle) * increment)
     self.y_velocity = self.y_velocity - (math.cos(self.angle) * increment)
-
 end
 
 function object.decelerate(self, elapsed)
-
     if math.abs(self.x_velocity) < 0.00003 then
         self.x_velocity = 0
     else
-        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
+        self.x_velocity = self.x_velocity *
+                              (1 -
+                                  (self.velocity_loss_pct ^
+                                      (1 + (elapsed / 500))))
     end
 
     if math.abs(self.y_velocity) < 0.00003 then
         self.y_velocity = 0
     else
-        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
+        self.y_velocity = self.y_velocity *
+                              (1 -
+                                  (self.velocity_loss_pct ^
+                                      (1 + (elapsed / 500))))
     end
-
 end
 
 function object.reverse(self, elapsed)
-
     local increment = self.reverse_accel_speed * elapsed
-    
+
     self.x_velocity = self.x_velocity - (math.sin(self.angle) * increment)
     self.y_velocity = self.y_velocity + (math.cos(self.angle) * increment)
-
 end
 
 function object.update_position(self, map_width, map_height)
-
     if self.colliding == false then
-        self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width - (self.height / 4))
-        self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height - (self.height / 4))
+        self.x = math.min(math.max(self.x + self.x_velocity, 0),
+                          map_width - (self.height / 4))
+        self.y = math.min(math.max(self.y + self.y_velocity, 0),
+                          map_height - (self.height / 4))
     end
-
 end
 
 function object.adjust_size(self, new_size_modifier)
-
-    local orig_width = (1/self.size_modifier) * self.width
-    local orig_height = (1/self.size_modifier) * self.height
+    local orig_width = (1 / self.size_modifier) * self.width
+    local orig_height = (1 / self.size_modifier) * self.height
 
     self.width = new_size_modifier * orig_width
     self.height = new_size_modifier * orig_height
     self.size_modifier = new_size_modifier
-
 end
 
 function object.update_corner_coordinates(self)
-    self.topleft_x = self.x + collision.rotate_x_coord(
-        -self.width / 2,
-        -self.height / 2,
-        self.angle)
-    self.topleft_y = self.y + collision.rotate_y_coord(
-        -self.width / 2,
-        -self.height / 2,
-        self.angle)
-    self.topright_x = self.x + collision.rotate_x_coord(
-        self.width / 2,
-        -self.height / 2,
-        self.angle)
-    self.topright_y = self.y + collision.rotate_y_coord(
-        self.width / 2,
-        -self.height / 2,
-        self.angle)
-    self.bottomright_x = self.x + collision.rotate_x_coord(
-        self.width / 2,
-        self.height / 2,
-        self.angle)
-    self.bottomright_y = self.y + collision.rotate_y_coord(
-        self.width / 2,
-        self.height / 2,
-        self.angle)
-    self.bottomleft_x = self.x + collision.rotate_x_coord(
-        -self.width / 2,
-        self.height / 2,
-        self.angle)
-    self.bottomleft_y = self.y + collision.rotate_y_coord(
-        -self.width / 2,
-        self.height / 2,
-        self.angle)
+    self.topleft_x = self.x +
+                         collision.rotate_x_coord(-self.width / 2,
+                                                  -self.height / 2, self.angle)
+    self.topleft_y = self.y +
+                         collision.rotate_y_coord(-self.width / 2,
+                                                  -self.height / 2, self.angle)
+    self.topright_x = self.x +
+                          collision.rotate_x_coord(self.width / 2,
+                                                   -self.height / 2, self.angle)
+    self.topright_y = self.y +
+                          collision.rotate_y_coord(self.width / 2,
+                                                   -self.height / 2, self.angle)
+    self.bottomright_x = self.x +
+                             collision.rotate_x_coord(self.width / 2,
+                                                      self.height / 2,
+                                                      self.angle)
+    self.bottomright_y = self.y +
+                             collision.rotate_y_coord(self.width / 2,
+                                                      self.height / 2,
+                                                      self.angle)
+    self.bottomleft_x = self.x +
+                            collision.rotate_x_coord(-self.width / 2,
+                                                     self.height / 2, self.angle)
+    self.bottomleft_y = self.y +
+                            collision.rotate_y_coord(-self.width / 2,
+                                                     self.height / 2, self.angle)
 end
 
 function object:new(o)
-
     o = o or {}
-
     setmetatable(o, self)
     self.__index = self
 
@@ -188,7 +170,6 @@ function object:new(o)
 end
 
 function object:newtank(x, y)
-
     o = object:new()
 
     o.x = x
@@ -204,7 +185,7 @@ function object:newtank(x, y)
     o.size_modifier = 0.25
     o.rotation_speed = 1
     o.weapon_y_offset = 2
-    
+
     o.weight = 400
 
     o.width = 80 * o.size_modifier
@@ -214,7 +195,6 @@ function object:newtank(x, y)
 end
 
 function object:newbuggy(x, y)
-
     o = object:new()
 
     o.x = x
@@ -241,7 +221,6 @@ function object:newbuggy(x, y)
 end
 
 function object:newwall(x, y)
-
     o = object:new()
 
     o.x = x
@@ -263,18 +242,19 @@ function object:newwall(x, y)
     o:update_corner_coordinates()
 
     return o
-
 end
 
-local tree_images = {'tree1', 'tree2', 'tree3', 'tree4', 'tree5', 'tree6', 'tree7', 'tree8', 'tree9'}
+local tree_images = {
+    'tree1', 'tree2', 'tree3', 'tree4', 'tree5', 'tree6', 'tree7', 'tree8',
+    'tree9'
+}
 
 function object:newtree(x, y)
-
     o = object:new()
 
     o.x = x
     o.y = y
-    o.sprite_frame = tree_images[ math.random( #tree_images ) ]
+    o.sprite_frame = tree_images[math.random(#tree_images)]
     o.sprite_top = nil
     o.max_speed = 0
     o.max_reverse_speed = 0
@@ -293,11 +273,9 @@ function object:newtree(x, y)
     return o
 end
 
-
-local rock_images = {'rock1'} --, 'rock2', 'rock3', 'rock4', 'rock5', 'rock6', 'rock7', 'rock8', 'rock9'}
+local rock_images = {'rock1'} -- , 'rock2', 'rock3', 'rock4', 'rock5', 'rock6', 'rock7', 'rock8', 'rock9'}
 
 function object.newrock(x, y)
-
     assert(x ~= nil)
     assert(y ~= nil)
 
@@ -305,7 +283,7 @@ function object.newrock(x, y)
 
     o.x = x
     o.y = y
-    o.sprite_frame = rock_images[ math.random( #rock_images ) ]
+    o.sprite_frame = rock_images[math.random(#rock_images)]
     o.sprite_top = nil
     o.max_speed = 0
     o.max_reverse_speed = 0
