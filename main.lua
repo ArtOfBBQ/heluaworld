@@ -28,23 +28,22 @@ function love.load()
     local map = require('modules.map')
 
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(500, 900)
+    gameobjects[1] = object:newbuggy(78.98, 78.38)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     gameobjects[1].id = 1
+    gameobjects[1]:update_corner_coordinates()
 
-    gameobjects[2] = object:newbuggy(850, 900)
-    gameobjects[2].id = 1
-    gameobjects[3] = object:newbuggy(775, 940)
+    gameobjects[2] = object:newbuggy(195, 200)
+    gameobjects[2].id = 2
+    gameobjects[2].angle = 1.85
+    gameobjects[2]:update_corner_coordinates()
+
+    gameobjects[3] = object:newbuggy(295, 300)
     gameobjects[3].id = 3
-    gameobjects[4] = object:newbuggy(1025, 940)
-    gameobjects[4].id = 4
-    gameobjects[5] = object:newbuggy(1075, 820)
-    gameobjects[5].id = 5
-    gameobjects[6] = object:newbuggy(1125, 800)
-    gameobjects[6].id = 6
-    -- /to be removed later   
 
+    gameobjects[4] = object:newbuggy(395, 400)
+    gameobjects[4].id = 4
     
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
     love.window.setTitle("Build & conquer")
@@ -57,24 +56,16 @@ function love.load()
 
     pathfinding.fill_waypoints(
         gameobjects[2],
-        150,
-        1225)
+        500,
+        600)
     pathfinding.fill_waypoints(
         gameobjects[3],
-        175,
-        1275)
+        525,
+        650)
     pathfinding.fill_waypoints(
         gameobjects[4],
-        175,
-        1125)
-    pathfinding.fill_waypoints(
-        gameobjects[5],
-        200,
-        1150)
-    pathfinding.fill_waypoints(
-        gameobjects[6],
-        150,
-        1125)
+        495,
+        625)
 
     previous_time = os.clock()
 
@@ -204,8 +195,6 @@ function love.update(dt)
 
     end
 
-    -- collision.update_all_collisions()
-
 end
 
 function love.draw()
@@ -316,12 +305,6 @@ function love.draw()
 
     end
 
-    -- greenish border at the edge of the screen
-    -- love.graphics.setColor(0.2, 0.25, 0)
-    -- love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
-    -- love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
-    -- love.graphics.setColor(1, 1, 1)
-    
     -- if we're dragging a terrain piece, draw a red rectangle
     if i_grabbing ~= nil then
         love.graphics.setColor(0.4, 0.05, 0.05)
@@ -349,6 +332,22 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
     end
 
+    -- -- show rotated point for collision detection
+    -- love.graphics.setColor(0, 1, 1)
+    -- local rotated_x_debug = gameobjects[2].x + collision.rotate_x_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
+    -- local rotated_y_debug = gameobjects[2].y + collision.rotate_y_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
+    -- love.graphics.circle("fill", camera.x_world_to_screen(rotated_x_debug), camera.y_world_to_screen(rotated_y_debug), 3)    
+    -- love.graphics.setColor(1, 0, 1)
+    -- love.graphics.rectangle(
+    --     "line",
+    --     camera.x_world_to_screen(gameobjects[2].x - (gameobjects[2].width / 2)),
+    --     camera.y_world_to_screen(gameobjects[2].y - (gameobjects[2].height / 2)),
+    --     gameobjects[2].width * camera.zoom,
+    --     gameobjects[2].height * camera.zoom,
+    --     1)    
+
+
     love.graphics.setColor(1, 1, 1)    
+    
 
 end

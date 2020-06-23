@@ -30,7 +30,34 @@ function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y
 
 end
 
+function collision.point_collides_rotated_rectangle(x, y, rect_x, rect_y, rect_width, rect_height, rect_angle)
+
+    if x == nil then error("Expected x-coordinate to check, got nil.") end
+    if y == nil then error("Expected y-coordinate to check, got nil.") end
+    if rect_x == nil then error("Expected x (middle) of rectangle to check, got nil.") end
+    if rect_y == nil then error("Expected y (middle) of rectangle to check, got nil.") end
+    if rect_width == nil then error("Expected width of rectangle to check, got nil.") end
+    if rect_height == nil then error("Expected height of rectangle to check, got nil.") end
+    if rect_angle == nil then error("Expected angle of rectangle to check, got nil.") end
+
+    return collision.point_collides_unrotated_rectangle(
+        rect_x + collision.rotate_x_coord(x - rect_x, y - rect_y, -rect_angle),
+        rect_y + collision.rotate_y_coord(x - rect_x, y - rect_y, -rect_angle),
+        rect_x - (rect_width / 2),
+        rect_y - (rect_height / 2),
+        rect_width,
+        rect_height)
+    
+end
+
 function collision.point_collides_unrotated_rectangle(x, y, rect_left, rect_top, rect_width, rect_height)
+
+    if x == nil then error("Expected x-coordinate to check, got nil.") end
+    if y == nil then error("Expected y-coordinate to check, got nil.") end
+    if rect_left == nil then error("Expected left of rectangle to check, got nil.") end
+    if rect_top == nil then error("Expected top of rectangle to check, got nil.") end
+    if rect_width == nil then error("Expected width of rectangle to check, got nil.") end
+    if rect_height == nil then error("Expected height of rectangle to check, got nil.") end
 
     if x < rect_left then
         return false
@@ -184,17 +211,17 @@ function collision.register_collision(i, j)
     gameobjects[i].colliding = true
     gameobjects[j].colliding = true
 
-    if math.abs((gameobjects[j].x_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].x_velocity + 1) * gameobjects[i].weight) then
-        gameobjects[i].x_velocity = 0
-    else
-        gameobjects[j].x_velocity = 0
-    end
+    local i_weight_proportion = 1 - (gameobjects[i].weight / (gameobjects[i].weight + gameobjects[j].weight))
+    local j_weight_proportion = 1 - i_weight_proportion
 
-    if math.abs((gameobjects[j].y_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].y_velocity + 1) * gameobjects[i].weight) then
-        gameobjects[i].x_velocity = 0
-    else
-        gameobjects[j].y_velocity = 0
-    end
+    local total_x_velocity = 0.05 + gameobjects[i].x_velocity + gameobjects[j].x_velocity
+    local total_y_velocity = 0.05 + gameobjects[i].y_velocity + gameobjects[j].y_velocity
+
+    gameobjects[i].x_velocity = total_x_velocity * i_weight_proportion
+    gameobjects[j].x_velocity = total_x_velocity * j_weight_proportion
+
+    gameobjects[i].y_velocity = total_y_velocity * i_weight_proportion
+    gameobjects[j].y_velocity = total_y_velocity * j_weight_proportion
 
 end
 
