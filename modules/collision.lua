@@ -94,6 +94,9 @@ end
 -- function would still return false
 function collision.are_unrotated_object_corners_colliding(i, j)
 
+    assert(i ~= nil, "nil i was passed to collision detector")
+    assert(gameobjects[i] ~= nil)
+
     if collision.point_collides_unrotated_object(
         gameobjects[i].bottomleft_x,
         gameobjects[i].bottomleft_y,
@@ -173,66 +176,23 @@ function collision.are_rotated_object_corners_colliding(i, j)
 
 end
 
-
-function collision.update_all_collisions()
-
-    for i = 1, #gameobjects, 1 do
-
-        for j = 1, #gameobjects, 1 do
-
-            if i == j then 
-                -- an object can't collide with itself
-                -- do nothing
-            else
-                
-                if gameobjects[j].angle == 0 or gameobjects[j].angle == 3.14 then
-
-                    -- object j is not rotated at an angle
-                    -- it's cheap to check if any of i's corners are inside j
-                    if
-                        collision.are_unrotated_object_corners_colliding(i, j)
-                    then
-                        collision.register_collision(i, j)
-                    end
-                else
-
-                    -- object j is rotated at an angle
-                    -- we need to do a more computationally expensive process
-                    -- to find if any of i's corners are inside j
-                    if
-                        collision.are_rotated_object_corners_colliding(i, j)
-                    then
-                        collision.register_collision(i, j)
-                    end
-                end
-
-            end
-        end
-
-    end
-
-end
-
 -- Please call this function whenever a collision has been detected between
 -- gameobjects of index i and j
+-- this function should change the velocities of the objects
 function collision.register_collision(i, j)
 
     gameobjects[i].colliding = true
     gameobjects[j].colliding = true
 
     if math.abs((gameobjects[j].x_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].x_velocity + 1) * gameobjects[i].weight) then
-        gameobjects[i].x = gameobjects[i].x +  ((gameobjects[i].x - gameobjects[j].x) * 0.005 * (2 + gameobjects[i].x_velocity))
         gameobjects[i].x_velocity = 0
     else
-        gameobjects[j].x = gameobjects[j].x + ((gameobjects[j].x - gameobjects[i].x) * 0.005 * (2 + gameobjects[j].x_velocity))
         gameobjects[j].x_velocity = 0
     end
 
     if math.abs((gameobjects[j].y_velocity + 1) * gameobjects[j].weight) > math.abs((gameobjects[i].y_velocity + 1) * gameobjects[i].weight) then
-        gameobjects[i].y = gameobjects[i].y + ((gameobjects[i].y - gameobjects[j].y) * 0.005 * (2 + gameobjects[i].y_velocity))
         gameobjects[i].x_velocity = 0
     else
-        gameobjects[j].y = gameobjects[j].y + ((gameobjects[j].y - gameobjects[i].y) * 0.005 * (2 + gameobjects[j].y_velocity))
         gameobjects[j].y_velocity = 0
     end
 

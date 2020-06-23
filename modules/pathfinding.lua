@@ -260,7 +260,7 @@ function pathfinding.fill_waypoints(gameobject, target_x, target_y)
     
     repeat
         pathfinding.single_astar_step(gameobject, target_x, target_y)
-    until #closed_nodes > 1000000 or #open_nodes < 1 or #gameobject.waypoints > 0
+    until #closed_nodes > 5000 or #open_nodes < 1 or #gameobject.waypoints > 0
 
 end
 
