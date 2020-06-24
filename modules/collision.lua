@@ -145,16 +145,15 @@ function collision.register_collision(i, j)
                                             gameobjects[j].weight))
     local j_weight_proportion = 1 - i_weight_proportion
 
-    local total_x_velocity = 0.05 + gameobjects[i].x_velocity +
-                                 gameobjects[j].x_velocity
-    local total_y_velocity = 0.05 + gameobjects[i].y_velocity +
-                                 gameobjects[j].y_velocity
+    local total_x_velocity = gameobjects[i].x_velocity + gameobjects[j].x_velocity
 
-    gameobjects[i].x_velocity = total_x_velocity * i_weight_proportion
-    gameobjects[j].x_velocity = total_x_velocity * j_weight_proportion
+    local total_y_velocity = gameobjects[i].y_velocity + gameobjects[j].y_velocity
 
-    gameobjects[i].y_velocity = total_y_velocity * i_weight_proportion
-    gameobjects[j].y_velocity = total_y_velocity * j_weight_proportion
+    gameobjects[i].x_velocity = total_x_velocity * i_weight_proportion * 0.9
+    gameobjects[j].x_velocity = total_x_velocity * j_weight_proportion * 0.9
+
+    gameobjects[i].y_velocity = total_y_velocity * i_weight_proportion * 0.9
+    gameobjects[j].y_velocity = total_y_velocity * j_weight_proportion * 0.9
 
 end
 

@@ -27,7 +27,7 @@ function love.load()
     local map = require('modules.map')
 
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(78.98, 78.38)
+    gameobjects[1] = object:newtank(78.98, 78.38)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     gameobjects[1].id = 1

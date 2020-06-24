@@ -263,9 +263,9 @@ function object:newtank(x, y)
     o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
-    o.max_speed = 2
+    o.max_speed = 3
     o.max_reverse_speed = 0.35
-    o.accel_speed = 0.5
+    o.accel_speed = 1
     o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
