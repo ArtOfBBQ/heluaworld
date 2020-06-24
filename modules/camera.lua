@@ -5,7 +5,8 @@ camera = {
     top = 0,
     speed = 1000,
     zoom = 1,
-    zoomspeed = 2}
+    zoomspeed = 2
+}
 
 function camera.x_screen_to_world(self, x_screen)
 
@@ -15,8 +16,8 @@ end
 
 function camera.y_screen_to_world(self, y_screen)
 
-    return (y_screen / camera.zoom) + self.top 
-    
+    return (y_screen / camera.zoom) + self.top
+
 end
 
 function camera.x_world_to_screen(x_world)
@@ -52,7 +53,8 @@ end
 
 function camera.scroll_right(self, elapsed, map_width)
 
-    self.left = math.max(math.min(self.left + (self.speed * elapsed), map_width + 5 - (camera.width / self.zoom)), 0)
+    self.left = math.max(math.min(self.left + (self.speed * elapsed),
+        map_width + 5 - (camera.width / self.zoom)), 0)
 
 end
 
@@ -70,9 +72,9 @@ end
 
 function camera.scroll_down(self, elapsed, map_height)
 
-    self.top = math.max(math.min(self.top + (self.speed * elapsed), map_height + 5 - (camera.height / self.zoom)), 0)
+    self.top = math.max(math.min(self.top + (self.speed * elapsed),
+        map_height + 5 - (camera.height / self.zoom)), 0)
 
 end
-
 
 return camera
