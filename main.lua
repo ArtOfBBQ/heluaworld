@@ -150,9 +150,7 @@ function love.update(dt)
         gameobjects[i_player]:rotate_right(elapsed)
     end
 
-    if keyboard.pressingleft then
-        gameobjects[i_player]:rotate_left(elapsed)
-    end
+    if keyboard.pressingleft then gameobjects[i_player]:rotate_left(elapsed) end
 
     if keyboard.pressingup then gameobjects[i_player]:accelerate(elapsed) end
 
@@ -297,12 +295,12 @@ function love.draw()
 
     -- a blue point to represent the player's final waypoint
     -- this is temporary code for debugging only
-    if gameobjects[i_player]["waypoints"] ~= nil and #gameobjects[i_player].waypoints > 0 then
+    if gameobjects[i_player]["waypoints"] ~= nil and
+        #gameobjects[i_player].waypoints > 0 then
         love.graphics.setColor(0.1, 0.1, 1)
         love.graphics.circle("fill", camera.x_world_to_screen(
-            gameobjects[i_player].waypoints[1].x),
-            camera.y_world_to_screen(gameobjects[i_player].waypoints[1].y),
-            5)
+            gameobjects[i_player].waypoints[1].x), camera.y_world_to_screen(
+            gameobjects[i_player].waypoints[1].y), 5)
         love.graphics.setColor(1, 1, 1)
     end
 
