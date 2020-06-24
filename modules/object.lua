@@ -110,15 +110,13 @@ function object.decelerate(self, elapsed)
     if math.abs(self.x_velocity) < 0.00003 then
         self.x_velocity = 0
     else
-        self.x_velocity = self.x_velocity *
-                                    (1 - (self.velocity_loss_pct))
+        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct))
     end
 
     if math.abs(self.y_velocity) < 0.00003 then
         self.y_velocity = 0
     else
-        self.y_velocity = self.y_velocity *
-                                   (1 - (self.velocity_loss_pct))
+        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct))
     end
 
 end
@@ -194,6 +192,7 @@ function object.update_position(self, map_width, map_height)
                     return
                 end
             end
+
         end
     end
 
@@ -263,9 +262,9 @@ function object:newtank(x, y)
     o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
-    o.max_speed = 3
+    o.max_speed = 5
     o.max_reverse_speed = 0.35
-    o.accel_speed = 1
+    o.accel_speed = 2
     o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
@@ -273,7 +272,7 @@ function object:newtank(x, y)
     o.rotation_speed = 0.01
     o.weapon_y_offset = 2
 
-    o.weight = 400
+    o.weight = 500
 
     o.width = 80 * o.size_modifier
     o.height = 156 * o.size_modifier
@@ -289,9 +288,9 @@ function object:newbuggy(x, y)
     o.y = y
     o.sprite_frame = 'buggy'
     o.sprite_top = 'buggygun'
-    o.max_speed = 8
+    o.max_speed = 10
     o.max_reverse_speed = 1.6
-    o.accel_speed = 2
+    o.accel_speed = 3
     o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
@@ -322,7 +321,7 @@ function object:newwall(x, y)
     o.angle = 0
     o.size_modifier = 0.25
 
-    o.weight = 800
+    o.weight = 2000
 
     o.width = 533 * o.size_modifier
     o.height = 111 * o.size_modifier

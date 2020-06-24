@@ -139,21 +139,63 @@ end
 -- this function should change the velocities of the objects
 function collision.register_collision(i, j)
 
-    local i_weight_proportion = 1 -
-                                    (gameobjects[i].weight /
-                                        (gameobjects[i].weight +
-                                            gameobjects[j].weight))
-    local j_weight_proportion = 1 - i_weight_proportion
+    -- I can't figure out how to do elastic collision by myself,
+    -- so I'm copying this C++ code line by line from Javidx9's public 'balls' repository
 
-    local total_x_velocity = gameobjects[i].x_velocity + gameobjects[j].x_velocity
+    -- // Distance between balls
+    -- float fDistance = sqrtf((b1->px - b2->px)*(b1->px - b2->px) + (b1->py - b2->py)*(b1->py - b2->py));
+    local dist_objects = math.sqrt((gameobjects[i].x - gameobjects[j].x) ^ 2 +
+                                       (gameobjects[i].y - gameobjects[j].y) ^ 2)
 
-    local total_y_velocity = gameobjects[i].y_velocity + gameobjects[j].y_velocity
+    -- // Normal
+    -- float nx = (b2->px - b1->px) / fDistance;
+    -- float ny = (b2->py - b1->py) / fDistance;
+    local nx = (gameobjects[j].x - gameobjects[i].x) / dist_objects
+    local ny = (gameobjects[j].y - gameobjects[i].y) / dist_objects
 
-    gameobjects[i].x_velocity = total_x_velocity * i_weight_proportion * 0.9
-    gameobjects[j].x_velocity = total_x_velocity * j_weight_proportion * 0.9
+    -- // Tangent
+    -- float tx = -ny;
+    -- float ty = nx;
+    local tx = -ny
+    local ty = nx
 
-    gameobjects[i].y_velocity = total_y_velocity * i_weight_proportion * 0.9
-    gameobjects[j].y_velocity = total_y_velocity * j_weight_proportion * 0.9
+    -- // Dot Product Tangent
+    -- float dpTan1 = b1->vx * tx + b1->vy * ty;
+    -- float dpTan2 = b2->vx * tx + b2->vy * ty;
+    local dpTan1 = (gameobjects[i].x_velocity * tx) +
+                       (gameobjects[i].y_velocity * ty)
+    local dpTan2 = (gameobjects[j].x_velocity * tx) +
+                       (gameobjects[j].y_velocity * ty)
+
+    -- // Dot Product Normal
+    -- float dpNorm1 = b1->vx * nx + b1->vy * ny;
+    -- float dpNorm2 = b2->vx * nx + b2->vy * ny;
+    local dpNorm1 = (gameobjects[i].x_velocity * nx) +
+                        (gameobjects[i].y_velocity * ny)
+    local dpNorm2 = (gameobjects[j].x_velocity * nx) +
+                        (gameobjects[j].y_velocity * ny)
+
+    -- // Conservation of momentum in 1D
+    -- float m1 = (dpNorm1 * (b1->mass - b2->mass) + 2.0f * b2->mass * dpNorm2) / (b1->mass + b2->mass);
+    -- float m2 = (dpNorm2 * (b2->mass - b1->mass) + 2.0f * b1->mass * dpNorm1) / (b1->mass + b2->mass);
+    local m1 =
+        ((dpNorm1 * (gameobjects[i].weight - gameobjects[j].weight)) + 2 *
+            gameobjects[j].weight * dpNorm2) /
+            (gameobjects[i].weight + gameobjects[j].weight)
+    local m2 =
+        ((dpNorm2 * (gameobjects[j].weight - gameobjects[i].weight)) + 2 *
+            gameobjects[i].weight * dpNorm1) /
+            (gameobjects[i].weight + gameobjects[j].weight)
+
+    -- // Update ball velocities
+    -- b1->vx = tx * dpTan1 + nx * m1;
+    -- b1->vy = ty * dpTan1 + ny * m1;
+    -- b2->vx = tx * dpTan2 + nx * m2;
+    -- b2->vy = ty * dpTan2 + ny * m2;
+    gameobjects[i].x_velocity = tx * dpTan1 + nx * m1 * 0.9
+    gameobjects[i].y_velocity = ty * dpTan1 + ny * m1 * 0.9
+    gameobjects[j].x_velocity = tx * dpTan2 + nx * m2 * 0.9
+    gameobjects[j].y_velocity = ty * dpTan2 + ny * m2 * 0.9
 
 end
 

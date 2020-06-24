@@ -39,16 +39,9 @@ function driver.drive(gameobject)
             gameobject.waypoints[#gameobject.waypoints] = nil
         end
 
-        if goal_angle == gameobject.angle then
-            -- already at goal angle
+        if math.abs(diff_to_goal_angle) <
+            (gameobject.rotation_velocity * elapsed * 10000) then
             gameobject:reduce_rotation_velocity(elapsed)
-            want_to_decelerate = false
-            want_to_accelerate = true
-        elseif math.abs(diff_to_goal_angle) <
-            (gameobject.rotation_speed * elapsed * 750) then
-            if math.abs(gameobject.rotation_speed) > 0.03 then
-                gameobject:reduce_rotation_velocity(elapsed)
-            end
             want_to_decelerate = false
             want_to_accelerate = true
         elseif math.abs(diff_to_goal_angle) > 3.13 and diff_to_goal_angle < 0 then
