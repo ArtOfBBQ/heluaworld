@@ -1,4 +1,5 @@
 object = {
+    id = nil,
     sprite_frame = nil,
     sprite_top = nil,
     x = 100,
@@ -16,6 +17,7 @@ object = {
     weight = 50,
     x_velocity = 0,
     y_velocity = 0,
+    rotation_velocity = 0,
     max_speed_while_rotating = 0.05,
     angle = 2,
     weapon_angle = nil,
@@ -30,6 +32,8 @@ object = {
     size_modifier = 1
 }
 
+local latest_id = 0
+
 function object.fix_radians_bounds(self, angle_property_name)
 
     if self[angle_property_name] == nil then return end
@@ -43,8 +47,8 @@ function object.rotate_left(self, elapsed)
     
     local increment = self.rotation_speed * elapsed
 
-    self.angle = self.angle - increment
-    if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
+    self.rotation_velocity = self.rotation_velocity - (1 * increment)
+    -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
@@ -55,8 +59,8 @@ function object.rotate_right(self, elapsed)
     
     local increment = self.rotation_speed * elapsed
 
-    self.angle = self.angle + increment
-    if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
+    self.rotation_velocity = self.rotation_velocity + increment
+    -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
@@ -94,16 +98,32 @@ end
 
 function object.decelerate(self, elapsed)
 
+    if math.abs(self.rotation_velocity) < 0.00003 then
+        self.rotation_velocity = 0
+    else
+        self.rotation_velocity = self.rotation_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 75))))
+    end
+
     if math.abs(self.x_velocity) < 0.00003 then
         self.x_velocity = 0
     else
-        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
+        self.x_velocity = self.x_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 250))))
     end
 
     if math.abs(self.y_velocity) < 0.00003 then
         self.y_velocity = 0
     else
-        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 500))))
+        self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct^(1 + (elapsed / 250))))
+    end
+
+end
+
+function object.reduce_rotation_velocity(self, elapsed)
+
+    if self.rotation_velocity > 0 then
+        self.rotation_velocity = math.max(self.rotation_velocity - (self.rotation_speed * 2 * elapsed), 0)
+    else
+        self.rotation_velocity = math.min(self.rotation_velocity + (self.rotation_speed * 2 * elapsed), 0)
     end
 
 end
@@ -119,10 +139,61 @@ end
 
 function object.update_position(self, map_width, map_height)
 
-    if self.colliding == false then
-        self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width - (self.height / 4))
-        self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height - (self.height / 4))
+    local old_x = self.x
+    self.x = math.min(math.max(self.x + self.x_velocity, 0), map_width - (self.height / 4))
+    local old_y = self.y
+    self.y = math.min(math.max(self.y + self.y_velocity, 0), map_height - (self.height / 4))
+
+    local old_angle = self.angle
+    self.angle = self.angle + self.rotation_velocity
+
+    self:update_corner_coordinates()
+    self:fix_radians_bounds()
+
+
+    for j = 1, #gameobjects, 1 do
+
+        if self.id ~= j then
+
+            -- check if the new position and angle collide with any object
+            if self.angle == 0 or self.angle == 3.14 then
+
+                -- object j is not rotated at an angle
+                -- it's cheap to check if any of i's corners are inside j
+                if
+                    collision.are_unrotated_object_corners_colliding(self.id, j)
+                    or collision.are_rotated_object_corners_colliding(j, self.id)
+                then
+                    collision.register_collision(self.id, j)
+                    self.x = old_x
+                    self.y = old_y
+                    self.angle = old_angle
+                    self:update_corner_coordinates()
+                    self:fix_radians_bounds()
+                    return
+                end
+            else
+
+                -- object j is rotated at an angle
+                -- we need to do a more computationally expensive process
+                -- to find if any of i's corners are inside j
+                if
+                    collision.are_rotated_object_corners_colliding(self.id, j)
+                    or collision.are_rotated_object_corners_colliding(j, self.id)
+                then
+                    collision.register_collision(self.id, j)
+                    self.x = old_x
+                    self.y = old_y
+                    self.angle = old_angle
+                    self:update_corner_coordinates()
+                    self:fix_radians_bounds()
+                    return
+                end
+            end
+        end
     end
+
+    self.colliding = false
 
 end
 
@@ -179,6 +250,9 @@ function object:new(o)
     setmetatable(o, self)
     self.__index = self
 
+    latest_id = latest_id + 1
+    o.id = latest_id
+
     o.width = o.width * o.size_modifier
     o.height = o.height * o.size_modifier
 
@@ -195,15 +269,16 @@ function object:newtank(x, y)
     o.y = y
     o.sprite_frame = 'tank'
     o.sprite_top = 'tankgun'
-    o.max_speed = 0.5
+    o.max_speed = 2
     o.max_reverse_speed = 0.35
     o.accel_speed = 0.5
     o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
-    o.rotation_speed = 1
+    o.rotation_speed = 0.01
     o.weapon_y_offset = 2
+    o.max_speed_while_rotating = 0.5
     
     o.weight = 400
 
@@ -221,16 +296,16 @@ function object:newbuggy(x, y)
     o.y = y
     o.sprite_frame = 'buggy'
     o.sprite_top = 'buggygun'
-    o.max_speed = 2
+    o.max_speed = 8
     o.max_reverse_speed = 1.6
-    o.accel_speed = 1.5
+    o.accel_speed = 2
     o.velocity_loss_pct = 0.01
     o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
-    o.rotation_speed = 4
+    o.rotation_speed = 0.05
     o.weapon_y_offset = 8
-    o.max_speed_while_rotating = 0.5
+    o.max_speed_while_rotating = 4
 
     o.weight = 20
 

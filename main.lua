@@ -8,7 +8,7 @@ elapsed = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
-local debug_mode = false
+local debug_mode = true
 local i_player = 1
 local i_grabbing = nil
 local clicked_x = 0
@@ -23,23 +23,49 @@ function love.load()
     local collision = require('modules.collision')
     local images = require('modules.imagefilenames')
     local camera = require('modules.camera')
-    local map = require('modules.map')
     local pathfinding = require("modules.pathfinding")
     local keyboard = require('modules.keyboard')
+    local map = require('modules.map')
 
+    -- testing code, to be removed later
+    gameobjects[1] = object:newbuggy(78.98, 78.38)
+    gameobjects[1].angle = 0
+    gameobjects[1].weapon_angle = gameobjects[1].angle
+    gameobjects[1].id = 1
+    gameobjects[1]:update_corner_coordinates()
+
+    gameobjects[2] = object:newbuggy(195, 200)
+    gameobjects[2].id = 2
+    gameobjects[2].angle = 1.85
+    gameobjects[2]:update_corner_coordinates()
+
+    gameobjects[3] = object:newbuggy(295, 300)
+    gameobjects[3].id = 3
+
+    gameobjects[4] = object:newbuggy(395, 400)
+    gameobjects[4].id = 4
+    
     love.window.setMode(camera.width, camera.height, {resizable=false, vsync=false, minwidth=400, minheight=300})
     love.window.setTitle("Build & conquer")
     
-    -- testing code, to be removed later
-    gameobjects[1] = object:newtank(500, 900)
-    gameobjects[1].angle = 0
-    gameobjects[1].weapon_angle = gameobjects[1].angle
-    -- /to be removed later
 
     for i = 1, #gameobjects, 1 do
         gameobjects[i]:update_corner_coordinates()
     end
     pathfinding.update_map_tiles_contains_obstacle(map)
+
+    pathfinding.fill_waypoints(
+        gameobjects[2],
+        500,
+        600)
+    pathfinding.fill_waypoints(
+        gameobjects[3],
+        525,
+        650)
+    pathfinding.fill_waypoints(
+        gameobjects[4],
+        495,
+        625)
 
     previous_time = os.clock()
 
@@ -64,49 +90,50 @@ function love.mousepressed(x, y, button, istouch)
     clicked_x = camera:x_screen_to_world(x)
     clicked_y = camera:y_screen_to_world(y)
 
-    if i_grabbing == nil then
-        for i = 1, #gameobjects, 1 do
-            if collision.point_collides_rotated_object(
-                clicked_x,
-                clicked_y,
-                gameobjects[i]) then
-                    i_grabbing = i
-                    return
+    if debug_mode == true then
+        if i_grabbing == nil then
+            for i = 1, #gameobjects, 1 do
+                if collision.point_collides_rotated_object(
+                    clicked_x,
+                    clicked_y,
+                    gameobjects[i]) then
+                        i_grabbing = i
+                        return
+                end
             end
+        else
+            gameobjects[i_grabbing].x = clicked_x
+            gameobjects[i_grabbing].y = clicked_y
+            gameobjects[i_grabbing]:update_corner_coordinates()
+            i_grabbing = nil
+            return
         end
-    else
-        gameobjects[i_grabbing].x = clicked_x
-        gameobjects[i_grabbing].y = clicked_y
-        gameobjects[i_grabbing]:update_corner_coordinates()
-        i_grabbing = nil
-        return
+
+        if keyboard['pressingr'] then
+            gameobjects[#gameobjects + 1] = object:newwall(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+        elseif keyboard['pressingt'] then
+            gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+        elseif keyboard['pressingm'] then
+            map:cycle_texture(
+                camera:x_screen_to_world(x),
+                camera:y_screen_to_world(y))
+        elseif keyboard['pressingn'] then
+            map:cycle_angle(
+                camera:x_screen_to_world(x),
+                camera:y_screen_to_world(y))
+        elseif keyboard['pressingb'] then
+            map:cycle_fit(
+                camera:x_screen_to_world(x),
+                camera:y_screen_to_world(y))
+        end
     end
 
-    if keyboard['pressingr'] then
-        gameobjects[#gameobjects + 1] = object:newwall(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
-    elseif keyboard['pressingt'] then
-        gameobjects[#gameobjects + 1] = object:newtree(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
-    elseif keyboard['pressingm'] then
-        map:cycle_texture(
-            camera:x_screen_to_world(x),
-            camera:y_screen_to_world(y))
-    elseif keyboard['pressingn'] then
-        map:cycle_angle(
-            camera:x_screen_to_world(x),
-            camera:y_screen_to_world(y))
-    elseif keyboard['pressingb'] then
-        map:cycle_fit(
-            camera:x_screen_to_world(x),
-            camera:y_screen_to_world(y))
-    else
-        -- if debug_mode == false then debug_mode = true else debug_mode = false end
-        local clicked_tile = map:coords_to_tile(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
-        if map.background_tiles[clicked_tile].contains_obstacle == false then
-            pathfinding.fill_waypoints(
-                gameobjects[i_player],
-                map.background_tiles[clicked_tile].left + (map.background_tiles[clicked_tile].width / 2),
-                map.background_tiles[clicked_tile].top + (map.background_tiles[clicked_tile].height / 2))
-        end
+    local clicked_tile = map:coords_to_tile(camera:x_screen_to_world(x), camera:y_screen_to_world(y))
+    if map.background_tiles[clicked_tile].contains_obstacle == false then
+        pathfinding.fill_waypoints(
+            gameobjects[i_player],
+            map.background_tiles[clicked_tile].left + (map.background_tiles[clicked_tile].width / 2),
+            map.background_tiles[clicked_tile].top + (map.background_tiles[clicked_tile].height / 2))
     end
     
 end
@@ -134,7 +161,6 @@ function love.update(dt)
     if keyboard.pressingright
         and math.abs(gameobjects[i_player].x_velocity) < gameobjects[i_player].max_speed_while_rotating 
         and math.abs(gameobjects[i_player].y_velocity) < gameobjects[i_player].max_speed_while_rotating
-        and gameobjects[i_player].colliding == false
     then 
         gameobjects[i_player]:rotate_right(elapsed) 
     end
@@ -142,7 +168,6 @@ function love.update(dt)
     if keyboard.pressingleft
         and math.abs(gameobjects[i_player].x_velocity) < gameobjects[i_player].max_speed_while_rotating 
         and math.abs(gameobjects[i_player].y_velocity) < gameobjects[i_player].max_speed_while_rotating
-        and gameobjects[i_player].colliding == false
     then 
         gameobjects[i_player]:rotate_left(elapsed)
     end
@@ -162,17 +187,13 @@ function love.update(dt)
 
         if gameobjects[i].max_speed ~= 0 then
             gameobjects[i]:decelerate(elapsed)
+            gameobjects[i]:update_corner_coordinates()
             gameobjects[i]:update_position(map.width, map.height)
             driver.drive(gameobjects[i])
             
-            gameobjects[i]:update_corner_coordinates()
         end
-        
-        -- about to detect collisions so set to false 
-        gameobjects[i].colliding = false
-    end
 
-    collision.update_all_collisions()
+    end
 
 end
 
@@ -223,7 +244,7 @@ function love.draw()
     for i = 1, #gameobjects, 1 do
 
         love.graphics.setColor(1, 1, 1)
-        assert(gameobjects[i].sprite_frame ~= nil)
+        assert(gameobjects[i].sprite_frame ~= nil, "gameobject " .. i .. " has no sprite_frame")
         assert(images[gameobjects[i].sprite_frame] ~= nil)
         love.graphics.draw(
             images[gameobjects[i].sprite_frame],
@@ -284,12 +305,6 @@ function love.draw()
 
     end
 
-    -- greenish border at the edge of the screen
-    -- love.graphics.setColor(0.2, 0.25, 0)
-    -- love.graphics.rectangle("fill", camera.x_world_to_screen(map.width), 0, 50 * camera.zoom, camera.y_world_to_screen(map.height) )   
-    -- love.graphics.rectangle("fill", 0, camera.y_world_to_screen(map.height), camera.x_world_to_screen(map.width) + (50 * camera.zoom),  50 * camera.zoom)
-    -- love.graphics.setColor(1, 1, 1)
-    
     -- if we're dragging a terrain piece, draw a red rectangle
     if i_grabbing ~= nil then
         love.graphics.setColor(0.4, 0.05, 0.05)
@@ -317,6 +332,22 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
     end
 
+    -- -- show rotated point for collision detection
+    -- love.graphics.setColor(0, 1, 1)
+    -- local rotated_x_debug = gameobjects[2].x + collision.rotate_x_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
+    -- local rotated_y_debug = gameobjects[2].y + collision.rotate_y_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
+    -- love.graphics.circle("fill", camera.x_world_to_screen(rotated_x_debug), camera.y_world_to_screen(rotated_y_debug), 3)    
+    -- love.graphics.setColor(1, 0, 1)
+    -- love.graphics.rectangle(
+    --     "line",
+    --     camera.x_world_to_screen(gameobjects[2].x - (gameobjects[2].width / 2)),
+    --     camera.y_world_to_screen(gameobjects[2].y - (gameobjects[2].height / 2)),
+    --     gameobjects[2].width * camera.zoom,
+    --     gameobjects[2].height * camera.zoom,
+    --     1)    
+
+
     love.graphics.setColor(1, 1, 1)    
+    
 
 end

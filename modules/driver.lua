@@ -34,8 +34,6 @@ function driver.drive(gameobject)
         local want_to_decelerate = false
         local want_to_accelerate = false
 
-        if math.abs(gameobject.x_velocity + gameobject.y_velocity) > 0.25 then want_to_decelerate = true end
-
         if math.abs(gameobject.x - gameobject.waypoints[#gameobject.waypoints].x) < ((gameobject.width + gameobject.height)/2) and
             math.abs(gameobject.y - gameobject.waypoints[#gameobject.waypoints].y) < ((gameobject.width + gameobject.height)/2) then
             gameobject.waypoints[#gameobject.waypoints] = nil
@@ -43,18 +41,27 @@ function driver.drive(gameobject)
 
         if goal_angle == gameobject.angle then
             -- already at goal angle
+            gameobject:reduce_rotation_velocity(elapsed)
             want_to_decelerate = false
             want_to_accelerate = true
-        elseif math.abs(diff_to_goal_angle) < gameobject.rotation_speed * elapsed then
-            gameobject.angle = goal_angle
+        elseif math.abs(diff_to_goal_angle) < (gameobject.rotation_speed * elapsed * 750) then
+            if math.abs(gameobject.rotation_speed) > 0.03 then
+                gameobject:reduce_rotation_velocity(elapsed)
+            end
             want_to_decelerate = false
             want_to_accelerate = true
         elseif math.abs(diff_to_goal_angle) > 3.13 and diff_to_goal_angle < 0 then
-            gameobject:rotate_left(elapsed)
+            if gameobject.rotation_speed > -0.20 then
+                gameobject:rotate_left(elapsed)
+            end
         elseif math.abs(diff_to_goal_angle) < 3.13 and diff_to_goal_angle > 0 then
-            gameobject:rotate_left(elapsed)
+            if gameobject.rotation_speed > -0.20 then
+                gameobject:rotate_left(elapsed)
+            end
         else
-            gameobject:rotate_right(elapsed)
+            if gameobject.rotation_speed < 0.20 then
+                gameobject:rotate_right(elapsed)
+            end
         end
 
         local weapon_goal_angle = 0
