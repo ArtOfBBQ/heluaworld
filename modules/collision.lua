@@ -29,8 +29,13 @@ function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y
 
 end
 
-function collision.point_collides_rotated_rectangle(x, y, rect_x, rect_y,
-    rect_width, rect_height, rect_angle)
+function collision.point_collides_rotated_rectangle(x,
+    y,
+    rect_x,
+    rect_y,
+    rect_width,
+    rect_height,
+    rect_angle)
 
     if x == nil then error("Expected x-coordinate to check, got nil.") end
     if y == nil then error("Expected y-coordinate to check, got nil.") end
@@ -58,8 +63,12 @@ function collision.point_collides_rotated_rectangle(x, y, rect_x, rect_y,
 
 end
 
-function collision.point_collides_unrotated_rectangle(x, y, rect_left, rect_top,
-    rect_width, rect_height)
+function collision.point_collides_unrotated_rectangle(x,
+    y,
+    rect_left,
+    rect_top,
+    rect_width,
+    rect_height)
 
     if x == nil then error("Expected x-coordinate to check, got nil.") end
     if y == nil then error("Expected y-coordinate to check, got nil.") end
@@ -103,12 +112,9 @@ end
 
 function collision.point_collides_rotated_object(x, y, gameobject)
 
-    return collision.point_collides_unrotated_object(
-        gameobject.x +
-            collision.rotate_x_coord(gameobject.x - x, gameobject.y - y,
-                gameobject.angle), gameobject.y +
-            collision.rotate_y_coord(gameobject.x - x, gameobject.y - y,
-                gameobject.angle), gameobject)
+    -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
+    return collision.point_collides_rotated_rectangle(x, y, gameobject.x,
+        gameobject.y, gameobject.width, gameobject.height, gameobject.angle)
 
 end
 

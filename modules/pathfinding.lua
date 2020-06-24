@@ -25,7 +25,9 @@ function pathfinding.reverse_table_inplace(table_to_reverse)
 
 end
 
-function pathfinding.move_index_from_table_to_table(table1, table2, i_in_table1)
+function pathfinding.move_index_from_table_to_table(table1,
+    table2,
+    i_in_table1)
 
     table2[#table2 + 1] = table1[i_in_table1]
 
@@ -114,7 +116,8 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
 end
 
-function pathfinding.get_direct_neighbor_tile_indexes(i_tile, tiles_per_row,
+function pathfinding.get_direct_neighbor_tile_indexes(i_tile,
+    tiles_per_row,
     tiles_per_col)
 
     local return_values = {}
@@ -150,7 +153,8 @@ function pathfinding.get_direct_neighbor_tile_indexes(i_tile, tiles_per_row,
 
 end
 
-function pathfinding.get_diagonal_neighbor_tile_indexes(i_tile, tiles_per_row,
+function pathfinding.get_diagonal_neighbor_tile_indexes(i_tile,
+    tiles_per_row,
     tiles_per_col)
 
     local return_values = {}
@@ -188,7 +192,8 @@ end
 
 -- Given an index in map.background_tiles, return a table
 -- with each index of the neighboring tiles
-function pathfinding.get_neighbor_tile_indexes(i_tile, tiles_per_row,
+function pathfinding.get_neighbor_tile_indexes(i_tile,
+    tiles_per_row,
     tiles_per_col)
 
     local straight = pathfinding.get_direct_neighbor_tile_indexes(i_tile,
@@ -206,7 +211,8 @@ end
 -- Given a table of tables, return the element with the lowest value
 -- of some property or set of properties. The smallest properties_to_compare[1]
 -- will be returned, and properties_to_compare[2] will be used in case of a tie, etc.
-function pathfinding.find_lowest_in_nodelist(nodelist, properties_to_compare)
+function pathfinding.find_lowest_in_nodelist(nodelist,
+    properties_to_compare)
 
     if type(nodelist) ~= "table" then
         error("Expected a table of nodes to compare, got " .. type(nodelist))
