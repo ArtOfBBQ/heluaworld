@@ -63,10 +63,18 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
             if gameobjects[j].max_speed == 0 then
 
-                for _, property_names in pairs({{"x", "y"}, {"topleft_x", "topleft_y"}, {"topright_x", "topright_y"}, {"bottomleft_x", "bottomright_y"}, {"bottomright_x", "bottomright_y"}}) do
+                for _, property_names in
+                    pairs({
+                        {"x", "y"}, {"topleft_x", "topleft_y"},
+                        {"topright_x", "topright_y"},
+                        {"bottomleft_x", "bottomright_y"},
+                        {"bottomright_x", "bottomright_y"}
+                    }) do
                     if collision.point_collides_unrotated_rectangle(
-                        gameobjects[j][ property_names[1] ], gameobjects[j][ property_names[2] ],
-                        map.background_tiles[i].left, map.background_tiles[i].top,
+                        gameobjects[j][property_names[1]],
+                        gameobjects[j][property_names[2]],
+                        map.background_tiles[i].left,
+                        map.background_tiles[i].top,
                         map.background_tiles[i].width,
                         map.background_tiles[i].height) then
 
