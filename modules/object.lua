@@ -104,27 +104,21 @@ function object.decelerate(self, elapsed)
         self.rotation_velocity = 0
     else
         self.rotation_velocity = self.rotation_velocity *
-                                     (1 -
-                                         (self.velocity_loss_pct ^
-                                             (1 + (elapsed / 75))))
+                                     (1 - (self.velocity_loss_pct))
     end
 
     if math.abs(self.x_velocity) < 0.00003 then
         self.x_velocity = 0
     else
         self.x_velocity = self.x_velocity *
-                              (1 -
-                                  (self.velocity_loss_pct ^
-                                      (1 + (elapsed / 250))))
+                                    (1 - (self.velocity_loss_pct))
     end
 
     if math.abs(self.y_velocity) < 0.00003 then
         self.y_velocity = 0
     else
         self.y_velocity = self.y_velocity *
-                              (1 -
-                                  (self.velocity_loss_pct ^
-                                      (1 + (elapsed / 250))))
+                                   (1 - (self.velocity_loss_pct))
     end
 
 end
