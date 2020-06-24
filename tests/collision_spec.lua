@@ -324,10 +324,4 @@ describe("We can detect if a point is in an rotated rectangle or not.",
                                 92.8, 95, 100, 15.04, 28.8, 1.85)) -- clearly colliding
                     end)
             end)
-
-        -- describe("Returns false when the point lies inside of the rectangle", function()
-        --     it("[20, 5] lies outside rectangle [10, 10, 50, 50].", function()
-        --         assert.is_false(collision.point_collides_unrotated_rectangle(20, 5, 10, 10, 50, 50))
-        --     end)
-        -- end)
     end)

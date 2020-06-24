@@ -8,27 +8,6 @@ function collision.rotate_y_coord(x, y, angle)
     return x * math.sin(angle) + (y * math.cos(angle))
 end
 
-function collision.rotate_x_around_point(x, y, angle, rtn_center_x, rtn_center_y)
-
-    x = x - rtn_center_x
-    y = y - rtn_center_y
-
-    return (x * math.cos(angle)) - (y * math.sin(angle)) + rtn_center_x
-
-end
-
-function collision.rotate_y_around_point(x, y, angle, rtn_center_x, rtn_center_y)
-
-    local sinus = math.sin(angle)
-    local cosinus = math.cos(angle)
-
-    x = x - rtn_center_x
-    y = y - rtn_center_y
-
-    return (x * sinus) + (y * cosinus) + rtn_center_y
-
-end
-
 function collision.point_collides_rotated_rectangle(x,
     y,
     rect_x,
@@ -99,11 +78,6 @@ end
 
 function collision.point_collides_unrotated_object(x, y, object)
 
-    -- all of our objects are rotated rectangles
-    -- so this function won't work out of the box
-    -- unless the object happens to be at an angle of 0
-    -- you need to fix rotation issues outside of it
-
     return collision.point_collides_unrotated_rectangle(x, y, object.x -
         (object.width / 2), object.y - (object.height / 2), object.width,
         object.height)
@@ -112,20 +86,11 @@ end
 
 function collision.point_collides_rotated_object(x, y, gameobject)
 
-    -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
     return collision.point_collides_rotated_rectangle(x, y, gameobject.x,
         gameobject.y, gameobject.width, gameobject.height, gameobject.angle)
 
 end
 
--- are any of the corners of object i inside unrotated object j?
--- object j must be an 'unrotated' rectangle
--- so the edges of the rectangle must be parallel with the screen
--- edges. This is true when the gameobject[j].angle is 0 (facing up) or 3.14 (facing down), 
---
--- note that it's still possible to be in collision even if all 4 corners
--- are not - the corner of object j could be inside of object i and this
--- function would still return false
 function collision.are_unrotated_object_corners_colliding(i, j)
 
     assert(i ~= nil, "nil i was passed to collision detector")
@@ -173,9 +138,6 @@ end
 -- gameobjects of index i and j
 -- this function should change the velocities of the objects
 function collision.register_collision(i, j)
-
-    gameobjects[i].colliding = true
-    gameobjects[j].colliding = true
 
     local i_weight_proportion = 1 -
                                     (gameobjects[i].weight /

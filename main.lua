@@ -146,17 +146,11 @@ function love.update(dt)
     if keyboard.pressingw then camera:scroll_up(elapsed) end
     if keyboard.pressings then camera:scroll_down(elapsed, map.height) end
 
-    if keyboard.pressingright and math.abs(gameobjects[i_player].x_velocity) <
-        gameobjects[i_player].max_speed_while_rotating and
-        math.abs(gameobjects[i_player].y_velocity) <
-        gameobjects[i_player].max_speed_while_rotating then
+    if keyboard.pressingright then
         gameobjects[i_player]:rotate_right(elapsed)
     end
 
-    if keyboard.pressingleft and math.abs(gameobjects[i_player].x_velocity) <
-        gameobjects[i_player].max_speed_while_rotating and
-        math.abs(gameobjects[i_player].y_velocity) <
-        gameobjects[i_player].max_speed_while_rotating then
+    if keyboard.pressingleft then
         gameobjects[i_player]:rotate_left(elapsed)
     end
 
@@ -267,12 +261,6 @@ function love.draw()
         -- for debugging only, draw little circles to outline the object
         if debug_mode then
 
-            if gameobjects[i].colliding then
-                love.graphics.setColor(1, 0.15, 0.15)
-            else
-                love.graphics.setColor(1, 1, 1)
-            end
-
             love.graphics.circle("fill", camera.x_world_to_screen(
                 gameobjects[i].topleft_x), camera.y_world_to_screen(
                 gameobjects[i].topleft_y), 2)
@@ -307,34 +295,16 @@ function love.draw()
                 .height * camera.zoom)
     end
 
-    -- blue points to represent the player's waypoints
+    -- a blue point to represent the player's final waypoint
     -- this is temporary code for debugging only
-    if gameobjects[i_player]["waypoints"] ~= nil then
+    if gameobjects[i_player]["waypoints"] ~= nil and #gameobjects[i_player].waypoints > 0 then
         love.graphics.setColor(0.1, 0.1, 1)
-        for i = 1, #gameobjects[i_player].waypoints, 1 do
-
-            love.graphics.circle("fill", camera.x_world_to_screen(
-                gameobjects[i_player].waypoints[i].x),
-                camera.y_world_to_screen(gameobjects[i_player].waypoints[i].y),
-                5)
-
-        end
+        love.graphics.circle("fill", camera.x_world_to_screen(
+            gameobjects[i_player].waypoints[1].x),
+            camera.y_world_to_screen(gameobjects[i_player].waypoints[1].y),
+            5)
         love.graphics.setColor(1, 1, 1)
     end
-
-    -- -- show rotated point for collision detection
-    -- love.graphics.setColor(0, 1, 1)
-    -- local rotated_x_debug = gameobjects[2].x + collision.rotate_x_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
-    -- local rotated_y_debug = gameobjects[2].y + collision.rotate_y_coord(gameobjects[1].bottomright_x - gameobjects[2].x, gameobjects[1].bottomright_y - gameobjects[2].y, -gameobjects[2].angle)
-    -- love.graphics.circle("fill", camera.x_world_to_screen(rotated_x_debug), camera.y_world_to_screen(rotated_y_debug), 3)    
-    -- love.graphics.setColor(1, 0, 1)
-    -- love.graphics.rectangle(
-    --     "line",
-    --     camera.x_world_to_screen(gameobjects[2].x - (gameobjects[2].width / 2)),
-    --     camera.y_world_to_screen(gameobjects[2].y - (gameobjects[2].height / 2)),
-    --     gameobjects[2].width * camera.zoom,
-    --     gameobjects[2].height * camera.zoom,
-    --     1)    
 
     love.graphics.setColor(1, 1, 1)
 

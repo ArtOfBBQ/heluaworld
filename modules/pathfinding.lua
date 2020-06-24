@@ -63,51 +63,16 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
             if gameobjects[j].max_speed == 0 then
 
-                if collision.point_collides_unrotated_rectangle(
-                    gameobjects[j].x, gameobjects[j].y,
-                    map.background_tiles[i].left, map.background_tiles[i].top,
-                    map.background_tiles[i].width,
-                    map.background_tiles[i].height) then
+                for _, property_names in pairs({{"x", "y"}, {"topleft_x", "topleft_y"}, {"topright_x", "topright_y"}, {"bottomleft_x", "bottomright_y"}, {"bottomright_x", "bottomright_y"}}) do
+                    if collision.point_collides_unrotated_rectangle(
+                        gameobjects[j][ property_names[1] ], gameobjects[j][ property_names[2] ],
+                        map.background_tiles[i].left, map.background_tiles[i].top,
+                        map.background_tiles[i].width,
+                        map.background_tiles[i].height) then
 
-                    map.background_tiles[i].contains_obstacle = true
+                        map.background_tiles[i].contains_obstacle = true
+                    end
                 end
-
-                if collision.point_collides_unrotated_rectangle(
-                    gameobjects[j].topleft_x, gameobjects[j].topleft_y,
-                    map.background_tiles[i].left, map.background_tiles[i].top,
-                    map.background_tiles[i].width,
-                    map.background_tiles[i].height) then
-
-                    map.background_tiles[i].contains_obstacle = true
-                end
-
-                if collision.point_collides_unrotated_rectangle(
-                    gameobjects[j].topright_x, gameobjects[j].topright_y,
-                    map.background_tiles[i].left, map.background_tiles[i].top,
-                    map.background_tiles[i].width,
-                    map.background_tiles[i].height) then
-
-                    map.background_tiles[i].contains_obstacle = true
-                end
-
-                if collision.point_collides_unrotated_rectangle(
-                    gameobjects[j].bottomleft_x, gameobjects[j].bottomleft_y,
-                    map.background_tiles[i].left, map.background_tiles[i].top,
-                    map.background_tiles[i].width,
-                    map.background_tiles[i].height) then
-
-                    map.background_tiles[i].contains_obstacle = true
-                end
-
-                if collision.point_collides_unrotated_rectangle(
-                    gameobjects[j].bottomright_x, gameobjects[j].bottomright_y,
-                    map.background_tiles[i].left, map.background_tiles[i].top,
-                    map.background_tiles[i].width,
-                    map.background_tiles[i].height) then
-
-                    map.background_tiles[i].contains_obstacle = true
-                end
-
             end
 
         end

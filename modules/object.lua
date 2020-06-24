@@ -18,11 +18,9 @@ object = {
     x_velocity = 0,
     y_velocity = 0,
     rotation_velocity = 0,
-    max_speed_while_rotating = 0.05,
     angle = 2,
     weapon_angle = nil,
     weapon_y_offset = 0,
-    colliding = false,
     max_speed = 30,
     max_reverse_speed = 10,
     accel_speed = 0.2,
@@ -205,8 +203,6 @@ function object.update_position(self, map_width, map_height)
         end
     end
 
-    self.colliding = false
-
 end
 
 function object.adjust_size(self, new_size_modifier)
@@ -282,7 +278,6 @@ function object:newtank(x, y)
     o.size_modifier = 0.25
     o.rotation_speed = 0.01
     o.weapon_y_offset = 2
-    o.max_speed_while_rotating = 0.5
 
     o.weight = 400
 
@@ -309,7 +304,6 @@ function object:newbuggy(x, y)
     o.size_modifier = 0.04
     o.rotation_speed = 0.05
     o.weapon_y_offset = 8
-    o.max_speed_while_rotating = 4
 
     o.weight = 20
 
