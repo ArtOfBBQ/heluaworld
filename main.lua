@@ -33,18 +33,30 @@ function love.load()
     gameobjects[1].id = 1
     gameobjects[1]:update_corner_coordinates()
 
-    gameobjects[2] = object:newtank(195, 200)
-    gameobjects[2].id = 2
-    gameobjects[2].angle = 1.85
-    gameobjects[2]:update_corner_coordinates()
+    -- gameobjects[2] = object:newtank(195, 200)
+    -- gameobjects[2].id = 2
+    -- gameobjects[2].angle = 1.85
+    -- gameobjects[2]:update_corner_coordinates()
 
-    gameobjects[3] = object:newbuggy(195, 250)
-    gameobjects[3].id = 3
-    gameobjects[3]:update_corner_coordinates()
+    -- gameobjects[3] = object:newbuggy(195, 250)
+    -- gameobjects[3].id = 3
+    -- gameobjects[3]:update_corner_coordinates()
 
-    gameobjects[4] = object:newbuggy(165, 280)
-    gameobjects[4].id = 4
-    gameobjects[4]:update_corner_coordinates()
+    -- gameobjects[4] = object:newbuggy(165, 280)
+    -- gameobjects[4].id = 4
+    -- gameobjects[4]:update_corner_coordinates()
+
+    -- gameobjects[5] = object:newbuggy(65, 180)
+    -- gameobjects[5].id = 5
+    -- gameobjects[5]:update_corner_coordinates()
+
+    -- gameobjects[6] = object:newbuggy(130, 150)
+    -- gameobjects[6].id = 6
+    -- gameobjects[6]:update_corner_coordinates()
+
+    -- gameobjects[7] = object:newbuggy(300, 50)
+    -- gameobjects[7].id = 7
+    -- gameobjects[7]:update_corner_coordinates()
 
     love.window.setMode(camera.width, camera.height, {
         resizable = false,
@@ -56,9 +68,6 @@ function love.load()
 
     for i = 1, #gameobjects, 1 do gameobjects[i]:update_corner_coordinates() end
     pathfinding.update_map_tiles_contains_obstacle(map)
-
-    pathfinding.fill_waypoints(gameobjects[1], 500, 600)
-    pathfinding.fill_waypoints(gameobjects[2], 500, 600)
 
     previous_time = os.clock()
 
@@ -96,6 +105,7 @@ function love.mousepressed(x, y, button, istouch)
             gameobjects[i_grabbing].y = clicked_y
             gameobjects[i_grabbing]:update_corner_coordinates()
             i_grabbing = nil
+            pathfinding.update_map_tiles_contains_obstacle(map)
             return
         end
 
@@ -123,11 +133,10 @@ function love.mousepressed(x, y, button, istouch)
         camera:y_screen_to_world(y))
     if map.background_tiles[clicked_tile].contains_obstacle == false then
         for i = 1, #gameobjects, 1 do
-            pathfinding.fill_waypoints(gameobjects[i],
-                map.background_tiles[clicked_tile].left +
-                    (map.background_tiles[clicked_tile].width / 2),
-                map.background_tiles[clicked_tile].top +
-                    (map.background_tiles[clicked_tile].height / 2))
+            gameobjects[i].goal_x = map.background_tiles[clicked_tile].left +
+                (map.background_tiles[clicked_tile].width / 2)
+            gameobjects[i].goal_y = map.background_tiles[clicked_tile].top +
+                (map.background_tiles[clicked_tile].height / 2)
         end
     end
 
@@ -182,6 +191,8 @@ function love.update(dt)
         end
 
     end
+
+    pathfinding.set_one_path()
 
 end
 
@@ -296,15 +307,27 @@ function love.draw()
                 .height * camera.zoom)
     end
 
-    -- a blue point to represent the player's final waypoint
+    -- a blue point to represent the player's waypoints
     -- this is temporary code for debugging only
+    
     if gameobjects[i_player]["waypoints"] ~= nil and
         #gameobjects[i_player].waypoints > 0 then
+        
         love.graphics.setColor(0.1, 0.1, 1)
-        love.graphics.circle("fill", camera.x_world_to_screen(
-            gameobjects[i_player].waypoints[1].x), camera.y_world_to_screen(
-            gameobjects[i_player].waypoints[1].y), 5)
+        for i = 1, #gameobjects[i_player].waypoints do
+            
+            love.graphics.circle("fill", camera.x_world_to_screen(
+                gameobjects[i_player].waypoints[i].x), camera.y_world_to_screen(
+                gameobjects[i_player].waypoints[i].y), 5)
+        end
         love.graphics.setColor(1, 1, 1)
     end
+
+
+    love.graphics.print("gameobjects[1]'s goal x: " .. (gameobjects[1].goal_x or "nil"), 20, 20)
+    love.graphics.print("gameobjects[1]'s goal y: " .. (gameobjects[1].goal_y or "nil"), 20, 40)
+    love.graphics.print("gameobjects[1]'s angle: " .. (gameobjects[1].angle or "nil"), 20, 60)
+    love.graphics.print("goal angle: " .. (goal_angle or "nil"), 20, 80)
+    love.graphics.print("diff to goal angle: " .. (diff_to_goal_angle or "nil"), 20, 100)
 
 end

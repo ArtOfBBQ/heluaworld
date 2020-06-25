@@ -3,6 +3,7 @@ pathfinding = {}
 local open_nodes = {}
 local closed_nodes = {}
 local neighboring_nodes = {}
+local i_pathfinder = 1  -- We only handle 1 object each game loop
 
 local i_cur_tile = nil
 local i_target_tile = nil
@@ -55,8 +56,8 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
     for i = 1, #map.background_tiles, 1 do
 
-        if map.background_tiles[i]["contains_obstacle"] == nil then
-            map.background_tiles.contains_obstacle = false
+        if map.background_tiles[i]["contains_obstacle"] ~= nil then
+            map.background_tiles.contains_obstacle = nil
         end
 
         for j = 1, #gameobjects, 1 do
@@ -83,6 +84,10 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
                 end
             end
 
+        end
+
+        if map.background_tiles[i]["contains_obstacle"] == nil then
+            map.background_tiles.contains_obstacle = false
         end
 
     end
@@ -228,13 +233,35 @@ function pathfinding.find_lowest_in_nodelist(nodelist,
 
 end
 
+function pathfinding.request_fill_waypoints(gameobject, target_x, target_y)
+
+    request_queue[#request_queue + 1] = {i_obj = gameobject.id, target_x = target_x, target_y = target_y}
+
+end
+
+function pathfinding.set_one_path()
+
+    assert(i_pathfinder ~= nil)
+
+    if i_pathfinder >= #gameobjects then
+        i_pathfinder = 1
+    else
+        i_pathfinder = i_pathfinder + 1
+    end
+
+    assert(gameobjects[i_pathfinder] ~= nil, "couldn't find i_pathfinder " .. i_pathfinder .. " in gameobjects with #gameobjects being " .. #gameobjects)
+    if gameobjects[i_pathfinder]["goal_x"] ~= nil and gameobjects[i_pathfinder]["goal_y"] ~= nil and gameobjects[i_pathfinder].max_speed > 0 then
+        pathfinding.fill_waypoints(gameobjects[i_pathfinder])
+    end
+
+end
+
 -- given a final destination,
 -- find a path to it and set the waypoints of the gameobject accordingly
 -- the driver module will send him there if we only set the waypoints correctly
-function pathfinding.fill_waypoints(gameobject, target_x, target_y)
+function pathfinding.fill_waypoints(gameobject)
 
-    gameobject.waypoints = {}
-    i_cur_tile = map:coords_to_tile(target_x, target_y)
+    i_cur_tile = map:coords_to_tile(gameobject.goal_x, gameobject.goal_y)
     i_target_tile = map:coords_to_tile(gameobject.x, gameobject.y)
 
     open_nodes = {
@@ -244,8 +271,8 @@ function pathfinding.fill_waypoints(gameobject, target_x, target_y)
             hcost = pathfinding.distance_between_points(
                 map.background_tiles[i_cur_tile].left + (map.tile_width / 2),
                 map.background_tiles[i_cur_tile].top + (map.tile_height / 2),
-                map.background_tiles[i_target_tile].left + (map.tile_width / 2),
-                map.background_tiles[i_target_tile].top + (map.tile_height / 2)),
+                gameobject.x,
+                gameobject.y),
             gcost = 0
         }
     }
@@ -253,8 +280,8 @@ function pathfinding.fill_waypoints(gameobject, target_x, target_y)
 
     closed_nodes = {}
 
-    repeat pathfinding.single_astar_step(gameobject, target_x, target_y) until #closed_nodes >
-        5000 or #open_nodes < 1 or #gameobject.waypoints > 0
+    repeat pathfinding.single_astar_step(gameobject, gameobject.target_x, gameobject.target_y) until #closed_nodes >
+        500 or #open_nodes < 1 or (gameobject.waypoints ~=nil and gameobject.waypoints[#gameobject.waypoints] ~= nil and gameobject.waypoints[#gameobject.waypoints].x == gameobject.goal_x and gameobject.waypoints[#gameobject.waypoints].y == gameobject.goal_y)
 
 end
 
@@ -273,7 +300,8 @@ function pathfinding.single_astar_step(gameobject, target_x, target_y)
     if closed_nodes[i_cur_tile].i_tile == i_target_tile then
 
         gameobject.waypoints = {}
-        repeat
+        while closed_nodes[i_cur_tile].i_closed_nodes_parent ~= nil do
+            i_cur_tile = closed_nodes[i_cur_tile].i_closed_nodes_parent
             gameobject.waypoints[#gameobject.waypoints + 1] =
                 {
                     x = map.background_tiles[closed_nodes[i_cur_tile].i_tile]
@@ -281,8 +309,7 @@ function pathfinding.single_astar_step(gameobject, target_x, target_y)
                     y = map.background_tiles[closed_nodes[i_cur_tile].i_tile]
                         .top + 25
                 }
-            i_cur_tile = closed_nodes[i_cur_tile].i_closed_nodes_parent
-        until i_cur_tile == nil
+        end 
         -- we need to reverse the order of the waypoints if there are 2 or more
         if #gameobject.waypoints > 1 then
             pathfinding.reverse_table_inplace(gameobject.waypoints)

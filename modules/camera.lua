@@ -31,8 +31,8 @@ end
 function camera.zoom_in(self, elapsed)
 
     self.zoom = self.zoom + (self.zoomspeed * elapsed)
-    if self.zoom > 2.5 then
-        self.zoom = 2.5
+    if self.zoom > 3.5 then
+        self.zoom = 3.5
     else
         self.left = self.left + (10 * self.zoomspeed * elapsed)
         self.top = self.top + (10 * self.zoomspeed * elapsed)

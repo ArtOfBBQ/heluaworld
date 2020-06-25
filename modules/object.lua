@@ -34,13 +34,15 @@ local latest_id = 0
 
 function object.fix_radians_bounds(self, angle_property_name)
 
-    if self[angle_property_name] == nil then return end
+    if angle_property_name == nil then error("Expected name of angle property to fix, got nil.") end
+    if self[angle_property_name] == nil then error(angle_property_name .. " is not a property, can't fix radians bounds.") end
 
     if self[angle_property_name] < 0 then
-        self[angle_property_name] = self[angle_property_name] + 6.28318
+        self[angle_property_name] = self[angle_property_name] + (math.pi * 10)
     end
-    if self[angle_property_name] > 6.28319 then
-        self[angle_property_name] = self[angle_property_name] - 6.28319
+
+    if self[angle_property_name] > math.pi * 2 then
+        self[angle_property_name] = self[angle_property_name] % (math.pi * 2)
     end
 
 end
@@ -144,9 +146,6 @@ end
 
 function object.update_position(self, map_width, map_height, properties_to_update)
 
-    assert(self.previous_x == nil or self.previous_x == self.x)
-    assert(self.previous_y == nil or self.previous_y == self.y)
-
     if properties_to_update == nil then properties_to_update = {x = true, y = true, angle = true} end
 
     local new_x = self.x
@@ -219,12 +218,10 @@ function object.update_position(self, map_width, map_height, properties_to_updat
 
     -- there were no collisions, change objects's position
     self.x = new_x
-    self.previous_x = self.x
     self.y = new_y
-    self.previous_y = self.y
     self.angle = new_angle
     self:update_corner_coordinates()
-    self:fix_radians_bounds()
+    self:fix_radians_bounds("angle")
 end
 
 function object.adjust_size(self, new_size_modifier)
@@ -311,8 +308,6 @@ function object:new(o)
 
     o.width = o.width * o.size_modifier
     o.height = o.height * o.size_modifier
-
-    o:update_corner_coordinates()
 
     return o
 end
