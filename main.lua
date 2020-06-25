@@ -27,22 +27,24 @@ function love.load()
     local map = require('modules.map')
 
     -- testing code, to be removed later
-    gameobjects[1] = object:newtank(78.98, 78.38)
+    gameobjects[1] = object:newbuggy(78.98, 78.38)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     gameobjects[1].id = 1
     gameobjects[1]:update_corner_coordinates()
 
-    gameobjects[2] = object:newbuggy(195, 200)
+    gameobjects[2] = object:newtank(195, 200)
     gameobjects[2].id = 2
     gameobjects[2].angle = 1.85
     gameobjects[2]:update_corner_coordinates()
 
-    gameobjects[3] = object:newbuggy(295, 300)
+    gameobjects[3] = object:newbuggy(195, 250)
     gameobjects[3].id = 3
+    gameobjects[3]:update_corner_coordinates()
 
-    gameobjects[4] = object:newbuggy(395, 400)
+    gameobjects[4] = object:newbuggy(165, 280)
     gameobjects[4].id = 4
+    gameobjects[4]:update_corner_coordinates()
 
     love.window.setMode(camera.width, camera.height, {
         resizable = false,
@@ -55,9 +57,8 @@ function love.load()
     for i = 1, #gameobjects, 1 do gameobjects[i]:update_corner_coordinates() end
     pathfinding.update_map_tiles_contains_obstacle(map)
 
+    pathfinding.fill_waypoints(gameobjects[1], 500, 600)
     pathfinding.fill_waypoints(gameobjects[2], 500, 600)
-    pathfinding.fill_waypoints(gameobjects[3], 525, 650)
-    pathfinding.fill_waypoints(gameobjects[4], 495, 625)
 
     previous_time = os.clock()
 
@@ -121,11 +122,13 @@ function love.mousepressed(x, y, button, istouch)
     local clicked_tile = map:coords_to_tile(camera:x_screen_to_world(x),
         camera:y_screen_to_world(y))
     if map.background_tiles[clicked_tile].contains_obstacle == false then
-        pathfinding.fill_waypoints(gameobjects[i_player],
-            map.background_tiles[clicked_tile].left +
-                (map.background_tiles[clicked_tile].width / 2),
-            map.background_tiles[clicked_tile].top +
-                (map.background_tiles[clicked_tile].height / 2))
+        for i = 1, #gameobjects, 1 do
+            pathfinding.fill_waypoints(gameobjects[i],
+                map.background_tiles[clicked_tile].left +
+                    (map.background_tiles[clicked_tile].width / 2),
+                map.background_tiles[clicked_tile].top +
+                    (map.background_tiles[clicked_tile].height / 2))
+        end
     end
 
 end
@@ -173,7 +176,7 @@ function love.update(dt)
         if gameobjects[i].max_speed ~= 0 then
             gameobjects[i]:decelerate(elapsed)
             gameobjects[i]:update_corner_coordinates()
-            gameobjects[i]:update_position(map.width, map.height)
+            gameobjects[i]:update_position(map.width, map.height, {x = true, y = true, angle = true})
             driver.drive(gameobjects[i])
 
         end
@@ -303,7 +306,5 @@ function love.draw()
             gameobjects[i_player].waypoints[1].y), 5)
         love.graphics.setColor(1, 1, 1)
     end
-
-    love.graphics.setColor(1, 1, 1)
 
 end

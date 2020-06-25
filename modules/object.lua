@@ -142,60 +142,89 @@ function object.reverse(self, elapsed)
 
 end
 
-function object.update_position(self, map_width, map_height)
+function object.update_position(self, map_width, map_height, properties_to_update)
 
-    local old_x = self.x
-    self.x = math.min(math.max(self.x + self.x_velocity, 0),
-        map_width - (self.height / 4))
-    local old_y = self.y
-    self.y = math.min(math.max(self.y + self.y_velocity, 0),
-        map_height - (self.height / 4))
+    assert(self.previous_x == nil or self.previous_x == self.x)
+    assert(self.previous_y == nil or self.previous_y == self.y)
 
-    local old_angle = self.angle
-    self.angle = self.angle + self.rotation_velocity
+    if properties_to_update == nil then properties_to_update = {x = true, y = true, angle = true} end
 
-    self:update_corner_coordinates()
-    self:fix_radians_bounds()
+    local new_x = self.x
+    if properties_to_update.x == true then
+        new_x = math.min(math.max(self.x + self.x_velocity, 0),
+            map_width - (self.height / 4))
+    end
 
+    local new_y = self.y
+    if properties_to_update.y == true then
+        new_y = math.min(math.max(self.y + self.y_velocity, 0),
+            map_height - (self.height / 4))
+    end
+
+    local new_angle = self.angle
+    if properties_to_update.angle == true then
+        new_angle = self.angle + self.rotation_velocity
+    end
+    
+    local new_corners = object.stats_to_corner_coordinates(new_x, new_y, self.width, self.height, new_angle)
+
+    -- check if the new position and angle collide with any object
     for j = 1, #gameobjects, 1 do
-
         if self.id ~= j then
 
-            -- check if the new position and angle collide with any object
-            if self.angle == 0 or self.angle == 3.14 then
+            for current_property, current_corner in pairs(new_corners) do
+               
+                -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
+                if collision.point_collides_rotated_rectangle(
+                    current_corner.x,
+                    current_corner.y,
+                    gameobjects[j].x,
+                    gameobjects[j].y,
+                    gameobjects[j].width,
+                    gameobjects[j].height,
+                    gameobjects[j].angle)
+                    or collision.point_collides_rotated_rectangle(
+                        gameobjects[j][current_property .. "_x"],
+                        gameobjects[j][current_property .. "_y"],
+                        new_x,
+                        new_y,
+                        self.width,
+                        self.height,
+                        new_angle) then
 
-                -- object j is not rotated at an angle
-                -- it's cheap to check if any of i's corners are inside j
-                if collision.are_unrotated_object_corners_colliding(self.id, j) or
-                    collision.are_rotated_object_corners_colliding(j, self.id) then
-                    collision.register_collision(self.id, j)
-                    self.x = old_x
-                    self.y = old_y
-                    self.angle = old_angle
-                    self:update_corner_coordinates()
-                    self:fix_radians_bounds()
-                    return
-                end
-            else
+                    if properties_to_update.x == true and properties_to_update.y == true and properties_to_update.angle == true then
+                        -- we can't move because our path is blocked
+                        
+                        -- firstly, register a collision
+                        collision.register_collision(self.id, j)
+                        
+                        -- try moving one property at a time
+                        
+                        -- try moving x only
+                        object.update_position(self, map_width, map_height, {x = true, y = false, angle = false})
 
-                -- object j is rotated at an angle
-                -- we need to do a more computationally expensive process
-                -- to find if any of i's corners are inside j
-                if collision.are_rotated_object_corners_colliding(self.id, j) or
-                    collision.are_rotated_object_corners_colliding(j, self.id) then
-                    collision.register_collision(self.id, j)
-                    self.x = old_x
-                    self.y = old_y
-                    self.angle = old_angle
-                    self:update_corner_coordinates()
-                    self:fix_radians_bounds()
+                        -- try moving y only
+                        object.update_position(self, map_width, map_height, {x = false, y = true, angle = false})
+
+                        -- try moving angle only
+                        object.update_position(self, map_width, map_height, {x = false, y = false, angle = true})
+                    end
+                    
                     return
+
                 end
             end
-
         end
     end
 
+    -- there were no collisions, change objects's position
+    self.x = new_x
+    self.previous_x = self.x
+    self.y = new_y
+    self.previous_y = self.y
+    self.angle = new_angle
+    self:update_corner_coordinates()
+    self:fix_radians_bounds()
 end
 
 function object.adjust_size(self, new_size_modifier)
@@ -234,6 +263,40 @@ function object.update_corner_coordinates(self)
     self.bottomleft_y = self.y +
                             collision.rotate_y_coord(-self.width / 2,
             self.height / 2, self.angle)
+end
+
+function object.stats_to_corner_coordinates(obj_x, obj_y, obj_width, obj_height, obj_angle)
+
+    if obj_x == nil then error("Expected x of rectangle to convert, got nil.") end
+    if obj_y == nil then error("Expected y of rectangle to convert, got nil.") end
+    if obj_width == nil then error("Expected width of rectangle to convert, got nil.") end
+    if obj_height == nil then error("Expected height of rectangle to convert, got nil.") end
+    if obj_angle == nil then error("Expected angle of rectangle to convert, got nil.") end
+
+    return_values = {}
+
+    return_values["topleft"] = {
+        x = obj_x + collision.rotate_x_coord(-obj_width / 2, -obj_height / 2, obj_angle),
+        y = obj_y + collision.rotate_y_coord(-obj_width / 2, -obj_height / 2, obj_angle)
+    }
+
+    return_values["topright"] = {
+        x = obj_x + collision.rotate_x_coord(obj_width / 2, -obj_height / 2, obj_angle),
+        y = obj_y + collision.rotate_y_coord(obj_width / 2, -obj_height / 2, obj_angle)
+    }
+
+    return_values["bottomright"] = {
+        x = obj_x + collision.rotate_x_coord(obj_width / 2, obj_height / 2, obj_angle),
+        y = obj_y + collision.rotate_y_coord(obj_width / 2, obj_height / 2, obj_angle)
+    }
+
+    return_values["bottomleft"] = {
+        x = obj_x + collision.rotate_x_coord(-obj_width / 2, obj_height / 2, obj_angle),
+        y = obj_y + collision.rotate_y_coord(-obj_width / 2, obj_height / 2, obj_angle)
+    }
+
+    return return_values
+
 end
 
 function object:new(o)
@@ -295,7 +358,7 @@ function object:newbuggy(x, y)
     o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
-    o.rotation_speed = 0.05
+    o.rotation_speed = 0.03
     o.weapon_y_offset = 8
 
     o.weight = 20

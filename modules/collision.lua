@@ -197,6 +197,10 @@ function collision.register_collision(i, j)
     gameobjects[j].x_velocity = tx * dpTan2 + nx * m2 * 0.9
     gameobjects[j].y_velocity = ty * dpTan2 + ny * m2 * 0.9
 
+    -- I have no idea how the objects are supposed to rotate,
+    -- after colliding, but this feels better than nothing
+    if math.abs(gameobjects[i].rotation_velocity) > 0 then gameobjects[i].rotation_velocity = gameobjects[i].rotation_velocity * -0.5 end
+    if math.abs(gameobjects[j].rotation_velocity) > 0 then gameobjects[j].rotation_velocity = gameobjects[j].rotation_velocity * -0.5 end
 end
 
 return collision
