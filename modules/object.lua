@@ -91,12 +91,22 @@ function object.rotate_weapon_right(self, elapsed)
 
 end
 
+function object.get_accelerated_x_velocity(angle, cur_x_velocity, accel_speed, elapsed)
+
+    return cur_x_velocity + (math.sin(angle) * (accel_speed * elapsed))
+
+end
+
+function object.get_accelerated_y_velocity(angle, cur_y_velocity, accel_speed, elapsed)
+
+    return cur_y_velocity - (math.cos(angle) * (accel_speed * elapsed))
+
+end
+
 function object.accelerate(self, elapsed)
 
-    local increment = self.accel_speed * elapsed
-
-    self.x_velocity = self.x_velocity + (math.sin(self.angle) * increment)
-    self.y_velocity = self.y_velocity - (math.cos(self.angle) * increment)
+    self.x_velocity = object.get_accelerated_x_velocity(self.angle, self.x_velocity, self.accel_speed, elapsed)
+    self.y_velocity = object.get_accelerated_y_velocity(self.angle, self.y_velocity, self.accel_speed, elapsed)
 
 end
 
@@ -137,10 +147,8 @@ end
 
 function object.reverse(self, elapsed)
 
-    local increment = self.reverse_accel_speed * elapsed
-
-    self.x_velocity = self.x_velocity - (math.sin(self.angle) * increment)
-    self.y_velocity = self.y_velocity + (math.cos(self.angle) * increment)
+    self.x_velocity = object.get_accelerated_x_velocity(self.angle, self.x_velocity, self.reverse_accel_speed, -elapsed)
+    self.y_velocity = object.get_accelerated_y_velocity(self.angle, self.y_velocity, self.reverse_accel_speed, -elapsed)
 
 end
 
