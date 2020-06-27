@@ -48,10 +48,8 @@ function object.fix_radians_bounds(self, angle_property_name)
 end
 
 function object.rotate_left(self, elapsed)
-
-    local increment = self.rotation_speed * elapsed
-
-    self.rotation_velocity = self.rotation_velocity - (1 * increment)
+    
+    self.rotation_velocity = self.rotation_velocity - (self.rotation_speed * elapsed)
     -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
 
     self:fix_radians_bounds('angle')
@@ -61,9 +59,7 @@ end
 
 function object.rotate_right(self, elapsed)
 
-    local increment = self.rotation_speed * elapsed
-
-    self.rotation_velocity = self.rotation_velocity + increment
+    self.rotation_velocity = self.rotation_velocity + (self.rotation_speed * elapsed)
     -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
 
     self:fix_radians_bounds('angle')

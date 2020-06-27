@@ -4,7 +4,6 @@ gameobjects = {}
 
 -- the time elapsed since the previous iteration of our game loop
 elapsed = 0
-
 local previous_time = os.clock()
 
 -- testing code, to be removed later
@@ -27,36 +26,36 @@ function love.load()
     local map = require('modules.map')
 
     -- testing code, to be removed later
-    gameobjects[1] = object:newbuggy(78.98, 78.38)
+    gameobjects[1] = object:newtank(78.98, 78.38)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     gameobjects[1].id = 1
     gameobjects[1]:update_corner_coordinates()
 
-    -- gameobjects[2] = object:newtank(195, 200)
-    -- gameobjects[2].id = 2
-    -- gameobjects[2].angle = 1.85
-    -- gameobjects[2]:update_corner_coordinates()
+    gameobjects[2] = object:newtank(195, 200)
+    gameobjects[2].id = 2
+    gameobjects[2].angle = 1.85
+    gameobjects[2]:update_corner_coordinates()
 
-    -- gameobjects[3] = object:newbuggy(195, 250)
-    -- gameobjects[3].id = 3
-    -- gameobjects[3]:update_corner_coordinates()
+    gameobjects[3] = object:newbuggy(195, 250)
+    gameobjects[3].id = 3
+    gameobjects[3]:update_corner_coordinates()
 
-    -- gameobjects[4] = object:newbuggy(165, 280)
-    -- gameobjects[4].id = 4
-    -- gameobjects[4]:update_corner_coordinates()
+    gameobjects[4] = object:newbuggy(165, 280)
+    gameobjects[4].id = 4
+    gameobjects[4]:update_corner_coordinates()
 
-    -- gameobjects[5] = object:newbuggy(65, 180)
-    -- gameobjects[5].id = 5
-    -- gameobjects[5]:update_corner_coordinates()
+    gameobjects[5] = object:newbuggy(65, 180)
+    gameobjects[5].id = 5
+    gameobjects[5]:update_corner_coordinates()
 
-    -- gameobjects[6] = object:newbuggy(130, 150)
-    -- gameobjects[6].id = 6
-    -- gameobjects[6]:update_corner_coordinates()
+    gameobjects[6] = object:newbuggy(130, 150)
+    gameobjects[6].id = 6
+    gameobjects[6]:update_corner_coordinates()
 
-    -- gameobjects[7] = object:newbuggy(300, 50)
-    -- gameobjects[7].id = 7
-    -- gameobjects[7]:update_corner_coordinates()
+    gameobjects[7] = object:newbuggy(300, 50)
+    gameobjects[7].id = 7
+    gameobjects[7]:update_corner_coordinates()
 
     love.window.setMode(camera.width, camera.height, {
         resizable = false,
@@ -327,7 +326,6 @@ function love.draw()
     love.graphics.print("gameobjects[1]'s goal x: " .. (gameobjects[1].goal_x or "nil"), 20, 20)
     love.graphics.print("gameobjects[1]'s goal y: " .. (gameobjects[1].goal_y or "nil"), 20, 40)
     love.graphics.print("gameobjects[1]'s angle: " .. (gameobjects[1].angle or "nil"), 20, 60)
-    love.graphics.print("goal angle: " .. (goal_angle or "nil"), 20, 80)
-    love.graphics.print("diff to goal angle: " .. (diff_to_goal_angle or "nil"), 20, 100)
+    love.graphics.print("gameobject[1]'s rotation vel: " .. (gameobjects[1].rotation_velocity or "nil"), 20, 80)
 
 end

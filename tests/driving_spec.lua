@@ -110,3 +110,28 @@ describe("We can find the ideal y-velocity given an angle to the goal.", functio
         assert.is_same(driver.get_ideal_y_velocity(math.pi * 1.75), -0.70710678118654746172)
     end)
 end)
+
+describe("We can find a good rotation velocity given an angle and a goal angle.", function()
+    it("Should return about 0 when the angle difference is 0.", function()
+        assert.is_same(driver.get_ideal_rotation_velocity(0), 0)
+    end)
+    it("Should return a high value when the angle difference is bigger than 0.5", function()
+        assert.is_same(driver.get_ideal_rotation_velocity(0.5), 0.1)
+        assert.is_same(driver.get_ideal_rotation_velocity(1), 0.1)
+        assert.is_same(driver.get_ideal_rotation_velocity(1.2), 0.1)
+        assert.is_same(driver.get_ideal_rotation_velocity(-0.5), -0.1)
+        assert.is_same(driver.get_ideal_rotation_velocity(-1), -0.1)
+        assert.is_same(driver.get_ideal_rotation_velocity(-1.2), -0.1)
+    end)
+    it("Should return a lower value when the angle difference is smaller than 0.5", function()
+        assert.is_true(driver.get_ideal_rotation_velocity(0.49) < 0.1)
+        assert.is_true(driver.get_ideal_rotation_velocity(-0.49) > -0.1)
+    end)
+    it("Should return a much lower value when the angle difference is smaller than 0.2", function()
+        assert.is_true(driver.get_ideal_rotation_velocity(0.3) < 0.1)
+        assert.is_true(driver.get_ideal_rotation_velocity(-0.3) > -0.1)
+    end)
+
+end)
+
+

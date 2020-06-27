@@ -39,19 +39,17 @@ function driver.drive(gameobject)
 
         -- rotation speed should be highest when diff_to_goal_angle is 3.14 or -3.14
         -- and lowest when diff_to_goal_angle is 0 or 6.28
-        local desired_rotation_intensity = ((math.pi - math.abs(math.pi - math.abs(diff_to_goal_angle))) * elapsed) / math.pi
-        assert(desired_rotation_intensity > 0, desired_rotation_intensity)
-        assert(desired_rotation_intensity <= elapsed, desired_rotation_intensity .. ", " .. elapsed)
-
-        if diff_to_goal_angle < 0 then
-            gameobject:rotate_left(desired_rotation_intensity)
+        local ideal_rotation_velocity = driver.get_ideal_rotation_velocity(diff_to_goal_angle)
+        
+        if gameobject.rotation_velocity > ideal_rotation_velocity then
+            gameobject:rotate_left(elapsed)
         else
-            gameobject:rotate_right(desired_rotation_intensity)
+            gameobject:rotate_right(elapsed)
         end
 
         -- to rate current speed vs ideal speed
-        local ideal_x_vel = driver.get_ideal_x_velocity(goal_angle) / 2
-        local ideal_y_vel = driver.get_ideal_y_velocity(goal_angle) / 2
+        local ideal_x_vel = driver.get_ideal_x_velocity(goal_angle) / 3
+        local ideal_y_vel = driver.get_ideal_y_velocity(goal_angle) / 3
         
         -- to rate acceleration vs ideal speed
         local accel_x_vel = object.get_accelerated_x_velocity(gameobject.angle, gameobject.x_velocity, gameobject.accel_speed, elapsed)
@@ -61,9 +59,9 @@ function driver.drive(gameobject)
         local reverse_x_vel = object.get_accelerated_x_velocity(gameobject.angle, gameobject.x_velocity, gameobject.reverse_accel_speed, -elapsed)
         local reverse_y_vel = object.get_accelerated_y_velocity(gameobject.angle, gameobject.y_velocity, gameobject.reverse_accel_speed, -elapsed)
 
-        local dist_cur_vs_ideal = (ideal_x_vel - gameobject.x_velocity)^2 + (ideal_y_vel - gameobject.y_velocity)^2
-        local dist_accel_vs_ideal = (ideal_x_vel - accel_x_vel)^2 + (ideal_y_vel - accel_y_vel)^2
-        local dist_reverse_vs_ideal = (ideal_x_vel - reverse_x_vel)^2 + (ideal_y_vel - reverse_y_vel)^2
+        local dist_cur_vs_ideal = (ideal_x_vel - gameobject.x_velocity)^2 + ((ideal_y_vel - gameobject.y_velocity)^2)
+        local dist_accel_vs_ideal = (ideal_x_vel - accel_x_vel)^2 + ((ideal_y_vel - accel_y_vel)^2)
+        local dist_reverse_vs_ideal = (ideal_x_vel - reverse_x_vel)^2 + ((ideal_y_vel - reverse_y_vel)^2)
 
         if dist_accel_vs_ideal < dist_cur_vs_ideal and dist_accel_vs_ideal < dist_reverse_vs_ideal then
             gameobject:accelerate(elapsed)
@@ -72,6 +70,12 @@ function driver.drive(gameobject)
         end
         
     end
+end
+
+function driver.get_ideal_rotation_velocity(diff_to_goal_angle)
+
+        return math.min(diff_to_goal_angle / 15, 0.009)
+
 end
 
 function driver.get_diff_angles(angle1, angle2)
@@ -110,20 +114,6 @@ function driver.get_ideal_y_velocity(angle_to_goal)
     if angle_to_goal < 0 or angle_to_goal > (math.pi * 2) then error("Expected radians angle to the goal, got " .. angle_to_goal .. ".") end
 
     return -math.cos(angle_to_goal)
-
-end
-
-function driver.get_desired_velocity_intesnity(angle, target_x, target_y)
-
-    local goal_angle = driver.get_goal_angle(
-        gameobject.x,
-        gameobject.y,
-        gameobject.waypoints[#gameobject.waypoints].x,
-        gameobject.waypoints[#gameobject.waypoints].y)
-
-    
-
-    return 
 
 end
 
