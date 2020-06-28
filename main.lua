@@ -194,7 +194,9 @@ function love.update(dt)
 
     end
 
-    pathfinding.set_one_path()
+    if math.random(1, 5) == 5 then
+        pathfinding.set_one_path()
+    end
 
 end
 

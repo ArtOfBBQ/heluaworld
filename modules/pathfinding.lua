@@ -309,7 +309,7 @@ function pathfinding.single_astar_step(gameobject, target_x, target_y)
                     y = map.background_tiles[closed_nodes[i_cur_tile].i_tile]
                         .top + 25
                 }
-        end 
+        end
         -- we need to reverse the order of the waypoints if there are 2 or more
         if #gameobject.waypoints > 1 then
             pathfinding.reverse_table_inplace(gameobject.waypoints)

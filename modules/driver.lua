@@ -13,8 +13,19 @@ function driver.drive(gameobject)
         gameobject:decelerate(elapsed * 150)
         return
     else
-
-        assert(elapsed ~= nil)
+        local dist_to_next_wp = pathfinding.distance_between_points(
+            gameobject.x,
+            gameobject.y,
+            gameobject.waypoints[#gameobject.waypoints].x,
+            gameobject.waypoints[#gameobject.waypoints].y)
+        if dist_to_next_wp < gameobject.height + gameobject.width then
+            gameobject.waypoints[#gameobject.waypoints] = nil
+            if #gameobject.waypoints == 0 then
+                gameobject.goal_x = nil
+                gameobject.goal_y = nil
+                return
+            end
+        end
 
         goal_angle = driver.get_goal_angle(
             gameobject.x,
@@ -48,8 +59,8 @@ function driver.drive(gameobject)
         end
 
         -- to rate current speed vs ideal speed
-        local ideal_x_vel = driver.get_ideal_x_velocity(goal_angle) / 3
-        local ideal_y_vel = driver.get_ideal_y_velocity(goal_angle) / 3
+        local ideal_x_vel = math.min(driver.get_ideal_x_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)), gameobject.max_velocity)
+        local ideal_y_vel = math.min(driver.get_ideal_y_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)), gameobject.max_velocity)
         
         -- to rate acceleration vs ideal speed
         local accel_x_vel = object.get_accelerated_x_velocity(gameobject.angle, gameobject.x_velocity, gameobject.accel_speed, elapsed)
@@ -68,7 +79,6 @@ function driver.drive(gameobject)
         elseif dist_reverse_vs_ideal < dist_cur_vs_ideal then
             gameobject:reverse(elapsed)
         end
-        
     end
 end
 
