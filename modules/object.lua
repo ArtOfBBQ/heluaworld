@@ -21,13 +21,12 @@ object = {
     angle = 2,
     weapon_angle = nil,
     weapon_y_offset = 0,
-    max_speed = 30,
-    max_reverse_speed = 10,
     accel_speed = 0.2,
     velocity_loss_pct = 0.005,
     reverse_accel_speed = 0.125,
     rotation_speed = 1.75,
-    size_modifier = 1
+    size_modifier = 1,
+    loops_since_collision = 9999
 }
 
 local latest_id = 0
@@ -148,37 +147,33 @@ function object.reverse(self, elapsed)
 
 end
 
-function object.update_position(self, map_width, map_height, properties_to_update)
+function object.update_position(self, map_width, map_height)
 
-    if properties_to_update == nil then properties_to_update = {x = true, y = true, angle = true} end
+    local found_collision = false
+    
+    local ran_x = 0
+    if self.loops_since_collision < 100 then ran_x = (math.random(-10, 10) / 300) end
+    new_x = math.min(math.max(self.x + self.x_velocity, 0),
+        map_width - (self.height / 4)) + ran_x
 
-    local new_x = self.x
-    if properties_to_update.x == true then
-        new_x = math.min(math.max(self.x + self.x_velocity, 0),
-            map_width - (self.height / 4))
-    end
+    local ran_y = 0
+    if self.loops_since_collision < 30 then ran_y = (math.random(-10, 10) / 300) end
+    new_y = math.min(math.max(self.y + self.y_velocity, 0),
+        map_height - (self.height / 4)) + ran_y
 
-    local new_y = self.y
-    if properties_to_update.y == true then
-        new_y = math.min(math.max(self.y + self.y_velocity, 0),
-            map_height - (self.height / 4))
-    end
-
-    local new_angle = self.angle
-    if properties_to_update.angle == true then
-        new_angle = self.angle + self.rotation_velocity
-    end
+    new_angle = self.angle + self.rotation_velocity
+    if new_angle < 0 then new_angle = math.pi * 2 end
+    if new_angle > math.pi * 2 then new_angle = 0 end
     
     local new_corners = object.stats_to_corner_coordinates(new_x, new_y, self.width, self.height, new_angle)
+    assert(new_corners ~= nil)
 
     -- check if the new position and angle collide with any object
     for j = 1, #gameobjects, 1 do
         if self.id ~= j then
-
             for current_property, current_corner in pairs(new_corners) do
-               
-                -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
-                if collision.point_collides_rotated_rectangle(
+                
+                local i_collides_j = collision.point_collides_rotated_rectangle(
                     current_corner.x,
                     current_corner.y,
                     gameobjects[j].x,
@@ -186,46 +181,35 @@ function object.update_position(self, map_width, map_height, properties_to_updat
                     gameobjects[j].width,
                     gameobjects[j].height,
                     gameobjects[j].angle)
-                    or collision.point_collides_rotated_rectangle(
-                        gameobjects[j][current_property .. "_x"],
-                        gameobjects[j][current_property .. "_y"],
-                        new_x,
-                        new_y,
-                        self.width,
-                        self.height,
-                        new_angle) then
 
-                    if properties_to_update.x == true and properties_to_update.y == true and properties_to_update.angle == true then
-                        -- we can't move because our path is blocked
-                        
-                        -- firstly, register a collision
-                        collision.register_collision(self.id, j)
-                        
-                        -- try moving one property at a time
-                        
-                        -- try moving x only
-                        object.update_position(self, map_width, map_height, {x = true, y = false, angle = false})
-
-                        -- try moving y only
-                        object.update_position(self, map_width, map_height, {x = false, y = true, angle = false})
-
-                        -- try moving angle only
-                        object.update_position(self, map_width, map_height, {x = false, y = false, angle = true})
-                    end
-                    
-                    return
-
+                local j_collides_i = collision.point_collides_rotated_rectangle(
+                    gameobjects[j][current_property .. "_x"],
+                    gameobjects[j][current_property .. "_y"],
+                    new_x,
+                    new_y,
+                    self.width,
+                    self.height,
+                    new_angle)
+                
+                -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
+                if i_collides_j or j_collides_i then found_collision = true
+                    found_collision = true
+                    collision.register_collision(self.id, j)
+                    break
                 end
             end
         end
     end
 
     -- there were no collisions, change objects's position
-    self.x = new_x
-    self.y = new_y
-    self.angle = new_angle
-    self:update_corner_coordinates()
-    self:fix_radians_bounds("angle")
+    if found_collision == false then
+        self.loops_since_collision = self.loops_since_collision + 1
+        self.x = new_x
+        self.y = new_y
+        self.angle = new_angle
+        self:update_corner_coordinates()
+        self:fix_radians_bounds("angle")
+    end
 end
 
 function object.adjust_size(self, new_size_modifier)

@@ -74,7 +74,7 @@ end
 
 function driver.get_ideal_rotation_velocity(diff_to_goal_angle)
 
-        return math.min(diff_to_goal_angle / 15, 0.009)
+    return math.max(math.min(diff_to_goal_angle / 15, 0.009), -0.009)
 
 end
 

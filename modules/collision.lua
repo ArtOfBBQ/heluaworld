@@ -201,6 +201,10 @@ function collision.register_collision(i, j)
     -- after colliding, but this feels better than nothing
     if math.abs(gameobjects[i].rotation_velocity) > 0 then gameobjects[i].rotation_velocity = gameobjects[i].rotation_velocity * -0.5 end
     if math.abs(gameobjects[j].rotation_velocity) > 0 then gameobjects[j].rotation_velocity = gameobjects[j].rotation_velocity * -0.5 end
+
+    -- keep track of latest collision
+    gameobjects[i].loops_since_collision = 0
+    gameobjects[j].loops_since_collision = 0
 end
 
 return collision

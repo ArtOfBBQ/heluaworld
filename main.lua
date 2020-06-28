@@ -4,6 +4,8 @@ gameobjects = {}
 
 -- the time elapsed since the previous iteration of our game loop
 elapsed = 0
+angle_only = false
+collision_count = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
@@ -26,13 +28,13 @@ function love.load()
     local map = require('modules.map')
 
     -- testing code, to be removed later
-    gameobjects[1] = object:newtank(78.98, 78.38)
+    gameobjects[1] = object:newbuggy(78.98, 78.38)
     gameobjects[1].angle = 0
     gameobjects[1].weapon_angle = gameobjects[1].angle
     gameobjects[1].id = 1
     gameobjects[1]:update_corner_coordinates()
 
-    gameobjects[2] = object:newtank(195, 200)
+    gameobjects[2] = object:newbuggy(195, 200)
     gameobjects[2].id = 2
     gameobjects[2].angle = 1.85
     gameobjects[2]:update_corner_coordinates()
@@ -184,7 +186,8 @@ function love.update(dt)
         if gameobjects[i].max_speed ~= 0 then
             gameobjects[i]:decelerate(elapsed)
             gameobjects[i]:update_corner_coordinates()
-            gameobjects[i]:update_position(map.width, map.height, {x = true, y = true, angle = true})
+            gameobjects[i]:update_position(map.width, map.height)
+            -- gameobjects[i]:push_and_rotate()
             driver.drive(gameobjects[i])
 
         end
@@ -322,10 +325,11 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
     end
 
-
     love.graphics.print("gameobjects[1]'s goal x: " .. (gameobjects[1].goal_x or "nil"), 20, 20)
     love.graphics.print("gameobjects[1]'s goal y: " .. (gameobjects[1].goal_y or "nil"), 20, 40)
     love.graphics.print("gameobjects[1]'s angle: " .. (gameobjects[1].angle or "nil"), 20, 60)
     love.graphics.print("gameobject[1]'s rotation vel: " .. (gameobjects[1].rotation_velocity or "nil"), 20, 80)
+    love.graphics.print("rotate angle only: " .. (tostring(angle_only) or "nil"), 20, 100)
+    love.graphics.print("collision count: " .. tostring(collision_count or "nil"), 20, 120)
 
 end
