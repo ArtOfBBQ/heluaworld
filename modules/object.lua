@@ -153,12 +153,12 @@ function object.update_position(self, map_width, map_height)
     local found_collision = false
     
     local ran_x = 0
-    if self.loops_since_collision < 100 then ran_x = (math.random(-10, 10) / 300) end
+    if self.loops_since_collision < 100 then ran_x = (math.random(-10, 10) / 50) end
     new_x = math.min(math.max(self.x + self.x_velocity, 0),
         map_width - (self.height / 4)) + ran_x
 
     local ran_y = 0
-    if self.loops_since_collision < 30 then ran_y = (math.random(-10, 10) / 300) end
+    if self.loops_since_collision < 30 then ran_y = (math.random(-10, 10) / 50) end
     new_y = math.min(math.max(self.y + self.y_velocity, 0),
         map_height - (self.height / 4)) + ran_y
 

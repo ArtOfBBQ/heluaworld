@@ -132,7 +132,7 @@ function love.mousepressed(x, y, button, istouch)
 
     local clicked_tile = map:coords_to_tile(camera:x_screen_to_world(x),
         camera:y_screen_to_world(y))
-    if map.background_tiles[clicked_tile].contains_obstacle == false then
+    if map.background_tiles[clicked_tile].contains_obstacle == false or map.background_tiles[clicked_tile].contains_obstacle == nil then
         for i = 1, #gameobjects, 1 do
             gameobjects[i].goal_x = map.background_tiles[clicked_tile].left +
                 (map.background_tiles[clicked_tile].width / 2)

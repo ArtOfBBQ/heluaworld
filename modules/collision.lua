@@ -207,10 +207,10 @@ function collision.register_collision(i, j)
     -- gameobjects[j].x_velocity = (tx * dpTan2 + nx * m2) * 0.95
     -- gameobjects[j].y_velocity = (ty * dpTan2 + ny * m2) * 0.95
 
-    gameobjects[i].x_velocity = gameobjects[i].x_velocity * -0.85
-    gameobjects[i].y_velocity = gameobjects[i].y_velocity * -0.85
-    gameobjects[j].x_velocity = gameobjects[i].x_velocity * -0.85
-    gameobjects[j].y_velocity = gameobjects[i].y_velocity * -0.85
+    gameobjects[i].x_velocity = gameobjects[i].x_velocity * -0.35
+    gameobjects[i].y_velocity = gameobjects[i].y_velocity * -0.35
+    gameobjects[j].x_velocity = gameobjects[i].x_velocity * -0.35
+    gameobjects[j].y_velocity = gameobjects[i].y_velocity * -0.35
 
     -- I have no idea how the objects are supposed to rotate,
     -- after colliding, but this feels better than nothing

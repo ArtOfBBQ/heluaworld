@@ -23,10 +23,10 @@ function pathfinding.reverse_table_inplace(table_to_reverse)
         table_to_reverse[i] = table_to_reverse[j]
         table_to_reverse[j] = temp
     end
-
 end
 
-function pathfinding.move_index_from_table_to_table(table1,
+function pathfinding.move_index_from_table_to_table(
+    table1,
     table2,
     i_in_table1)
 
@@ -41,7 +41,6 @@ function pathfinding.move_index_from_table_to_table(table1,
         table1[i_in_table1] = table1[#table1]
         table1[#table1] = nil
     end
-
 end
 
 function pathfinding.distance_between_points(x1, y1, x2, y2)
@@ -56,14 +55,10 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
 
     for i = 1, #map.background_tiles, 1 do
 
-        if map.background_tiles[i]["contains_obstacle"] ~= nil then
-            map.background_tiles.contains_obstacle = nil
-        end
+        map.background_tiles[i].contains_obstacle = nil
 
         for j = 1, #gameobjects, 1 do
-
             if gameobjects[j].max_speed == 0 then
-
                 for _, property_names in
                     pairs({
                         {"x", "y"}, {"topleft_x", "topleft_y"},
@@ -83,7 +78,6 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
                     end
                 end
             end
-
         end
 
         if map.background_tiles[i]["contains_obstacle"] == nil then
@@ -91,7 +85,6 @@ function pathfinding.update_map_tiles_contains_obstacle(map)
         end
 
     end
-
 end
 
 function pathfinding.get_direct_neighbor_tile_indexes(i_tile,
@@ -128,7 +121,6 @@ function pathfinding.get_direct_neighbor_tile_indexes(i_tile,
     end
 
     return return_values
-
 end
 
 function pathfinding.get_diagonal_neighbor_tile_indexes(i_tile,
@@ -165,7 +157,6 @@ function pathfinding.get_diagonal_neighbor_tile_indexes(i_tile,
     end
 
     return return_values
-
 end
 
 -- Given an index in map.background_tiles, return a table
@@ -217,12 +208,16 @@ function pathfinding.find_lowest_in_nodelist(nodelist,
         else
             if #properties_to_compare > 1 then
 
-                if nodelist[i] ~= nil and nodelist[i][properties_to_compare[1]] ==
+                if nodelist[i] ~= nil and nodelist[i][properties_to_compare[1]] <=
                     nodelist[lowest_node][properties_to_compare[1]] and
                     nodelist[i][properties_to_compare[2]] <
                     nodelist[lowest_node][properties_to_compare[2]] then
-
-                    lowest_node = i
+                        lowest_node = i
+                elseif nodelist[i] ~= nil and nodelist[i][properties_to_compare[1]] ==
+                    nodelist[lowest_node][properties_to_compare[1]] and
+                    nodelist[i][properties_to_compare[2]] ==
+                    nodelist[lowest_node][properties_to_compare[2]] then
+                        if math.random() > 0.5 then lowest_node = i end
                 end
 
             end
@@ -230,7 +225,6 @@ function pathfinding.find_lowest_in_nodelist(nodelist,
     end
 
     return lowest_node
-
 end
 
 function pathfinding.request_fill_waypoints(gameobject, target_x, target_y)
@@ -253,7 +247,6 @@ function pathfinding.set_one_path()
     if gameobjects[i_pathfinder]["goal_x"] ~= nil and gameobjects[i_pathfinder]["goal_y"] ~= nil and gameobjects[i_pathfinder].max_speed > 0 then
         pathfinding.fill_waypoints(gameobjects[i_pathfinder])
     end
-
 end
 
 -- given a final destination,
@@ -281,8 +274,9 @@ function pathfinding.fill_waypoints(gameobject)
     closed_nodes = {}
 
     repeat pathfinding.single_astar_step(gameobject, gameobject.target_x, gameobject.target_y) until #closed_nodes >
-        500 or #open_nodes < 1 or (gameobject.waypoints ~=nil and gameobject.waypoints[#gameobject.waypoints] ~= nil and gameobject.waypoints[#gameobject.waypoints].x == gameobject.goal_x and gameobject.waypoints[#gameobject.waypoints].y == gameobject.goal_y)
-
+        500 or #open_nodes < 1 or (gameobject.waypoints ~=nil
+        and gameobject.waypoints[#gameobject.waypoints] ~= nil and gameobject.waypoints[#gameobject.waypoints].x == gameobject.goal_x
+        and gameobject.waypoints[#gameobject.waypoints].y == gameobject.goal_y)
 end
 
 -- this is the "a-star" path-finding algorithm
