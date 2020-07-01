@@ -4,8 +4,6 @@ gameobjects = {}
 
 -- the time elapsed since the previous iteration of our game loop
 elapsed = 0
-angle_only = false
-collision_count = 0
 local previous_time = os.clock()
 
 -- testing code, to be removed later
@@ -326,12 +324,5 @@ function love.draw()
         end
         love.graphics.setColor(1, 1, 1)
     end
-
-    love.graphics.print("gameobjects[1]'s goal x: " .. (gameobjects[1].goal_x or "nil"), 20, 20)
-    love.graphics.print("gameobjects[1]'s goal y: " .. (gameobjects[1].goal_y or "nil"), 20, 40)
-    love.graphics.print("gameobjects[1]'s angle: " .. (gameobjects[1].angle or "nil"), 20, 60)
-    love.graphics.print("gameobject[1]'s rotation vel: " .. (gameobjects[1].rotation_velocity or "nil"), 20, 80)
-    love.graphics.print("rotate angle only: " .. (tostring(angle_only) or "nil"), 20, 100)
-    love.graphics.print("collision count: " .. tostring(collision_count or "nil"), 20, 120)
 
 end

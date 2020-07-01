@@ -27,25 +27,18 @@ function driver.drive(gameobject)
             end
         end
 
-        goal_angle = driver.get_goal_angle(
+        local goal_angle = driver.get_goal_angle(
             gameobject.x,
             gameobject.y,
             gameobject.waypoints[#gameobject.waypoints].x,
             gameobject.waypoints[#gameobject.waypoints].y)
         
-        
-        local final_goal_angle = driver.get_goal_angle(
-            gameobject.x,
-            gameobject.y,
-            gameobject.waypoints[1].x,
-            gameobject.waypoints[1].y)
-
         assert(gameobject.angle >= 0, gameobject.angle)
         assert(gameobject.angle <= (math.pi * 2))
         assert(goal_angle > 0)
         assert(goal_angle <= (math.pi * 2))
 
-        diff_to_goal_angle = driver.get_diff_angles(goal_angle, gameobject.angle)
+        local diff_to_goal_angle = driver.get_diff_angles(goal_angle, gameobject.angle)
         assert(math.abs(diff_to_goal_angle) < math.pi, diff_to_goal_angle)
 
         -- rotation speed should be highest when diff_to_goal_angle is 3.14 or -3.14
@@ -59,8 +52,8 @@ function driver.drive(gameobject)
         end
 
         -- to rate current speed vs ideal speed
-        local ideal_x_vel = math.min(driver.get_ideal_x_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)), gameobject.max_velocity)
-        local ideal_y_vel = math.min(driver.get_ideal_y_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)), gameobject.max_velocity)
+        local ideal_x_vel = math.min(driver.get_ideal_x_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)))
+        local ideal_y_vel = math.min(driver.get_ideal_y_velocity(goal_angle) / (1 + ((diff_to_goal_angle)*5)))
         
         -- to rate acceleration vs ideal speed
         local accel_x_vel = object.get_accelerated_x_velocity(gameobject.angle, gameobject.x_velocity, gameobject.accel_speed, elapsed)
@@ -79,6 +72,29 @@ function driver.drive(gameobject)
         elseif dist_reverse_vs_ideal < dist_cur_vs_ideal then
             gameobject:reverse(elapsed)
         end
+
+        if gameobject.weapon_angle ~= nil then
+            driver.rotate_weapon_to_final_goal(gameobject)
+        end
+    end
+end
+
+function driver.rotate_weapon_to_final_goal(gameobject)
+
+    local weapon_goal_angle = driver.get_goal_angle(
+                gameobject.x,
+                gameobject.y,
+                gameobject.waypoints[1].x,
+                gameobject.waypoints[1].y)
+
+    local diff_to_weapon_goal_angle = driver.get_diff_angles(weapon_goal_angle, gameobject.weapon_angle)
+
+    if math.abs(gameobject.weapon_angle - weapon_goal_angle) < 0.05 then
+        gameobject.weapon_angle = weapon_goal_angle
+    elseif diff_to_weapon_goal_angle > 0 then
+        gameobject:rotate_weapon_left(elapsed * 3)
+    else
+        gameobject:rotate_weapon_right(elapsed * 3)
     end
 end
 

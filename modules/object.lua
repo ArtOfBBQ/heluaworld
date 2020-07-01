@@ -17,13 +17,13 @@ object = {
     weight = 50,
     x_velocity = 0,
     y_velocity = 0,
-    max_velocity = 4,
     rotation_velocity = 0,
     angle = 2,
     weapon_angle = nil,
     weapon_y_offset = 0,
     accel_speed = 0.05,
     velocity_loss_pct = 0.005,
+    rotation_velocity_loss_pct = 0.005,
     reverse_accel_speed = 0.125,
     rotation_speed = 1.75,
     size_modifier = 1,
@@ -112,7 +112,7 @@ function object.decelerate(self, elapsed)
         self.rotation_velocity = 0
     else
         self.rotation_velocity = self.rotation_velocity *
-                                     (1 - (self.velocity_loss_pct))
+                                     (1 - (self.rotation_velocity_loss_pct))
     end
 
     if math.abs(self.x_velocity) < 0.00003 then
@@ -149,68 +149,44 @@ function object.reverse(self, elapsed)
 end
 
 function object.update_position(self, map_width, map_height)
-
-    local found_collision = false
     
-    local ran_x = 0
-    if self.loops_since_collision < 100 then ran_x = (math.random(-10, 10) / 50) end
-    new_x = math.min(math.max(self.x + self.x_velocity, 0),
-        map_width - (self.height / 4)) + ran_x
+    local new_x = math.min(math.max(self.x + self.x_velocity, 0),
+        map_width - (self.height / 4))
 
-    local ran_y = 0
-    if self.loops_since_collision < 30 then ran_y = (math.random(-10, 10) / 50) end
-    new_y = math.min(math.max(self.y + self.y_velocity, 0),
-        map_height - (self.height / 4)) + ran_y
+    local new_y = math.min(math.max(self.y + self.y_velocity, 0),
+        map_height - (self.height / 4))
 
-    new_angle = self.angle + self.rotation_velocity
+    local new_angle = self.angle + self.rotation_velocity
     if new_angle < 0 then new_angle = math.pi * 2 end
     if new_angle > math.pi * 2 then new_angle = 0 end
     
-    local new_corners = object.stats_to_corner_coordinates(new_x, new_y, self.width, self.height, new_angle)
-    assert(new_corners ~= nil)
-
-    -- check if the new position and angle collide with any object
-    for j = 1, #gameobjects, 1 do
-        if self.id ~= j then
-            for current_property, current_corner in pairs(new_corners) do
-                
-                local i_collides_j = collision.point_collides_rotated_rectangle(
-                    current_corner.x,
-                    current_corner.y,
-                    gameobjects[j].x,
-                    gameobjects[j].y,
-                    gameobjects[j].width,
-                    gameobjects[j].height,
-                    gameobjects[j].angle)
-
-                local j_collides_i = collision.point_collides_rotated_rectangle(
-                    gameobjects[j][current_property .. "_x"],
-                    gameobjects[j][current_property .. "_y"],
-                    new_x,
-                    new_y,
-                    self.width,
-                    self.height,
-                    new_angle)
-                
-                -- x, y, rect_x, rect_y, rect_width, rect_height, rect_angle
-                if i_collides_j or j_collides_i then found_collision = true
-                    found_collision = true
-                    collision.register_collision(self.id, j)
-                    break
-                end
-            end
-        end
-    end
-
     -- there were no collisions, change objects's position
-    if found_collision == false then
-        self.loops_since_collision = self.loops_since_collision + 1
+    if collision.can_move_to_position(self.id, new_x, new_y, new_angle) == true then
         self.x = new_x
         self.y = new_y
         self.angle = new_angle
-        self:update_corner_coordinates()
-        self:fix_radians_bounds("angle")
+    elseif collision.can_move_to_position(self.id, self.x - 1, self.y - 1, new_angle) == true then
+        self.x = new_x - 1
+        self.y = new_y - 1
+        self.angle = new_angle
+    elseif collision.can_move_to_position(self.id, self.x + 1, self.y + 1, new_angle) == true then
+        self.x = new_x + 1
+        self.y = new_y + 1
+        self.angle = new_angle
+    elseif collision.can_move_to_position(self.id, self.x - 1, self.y + 1, new_angle) == true then
+        self.x = new_x - 1
+        self.y = new_y + 1
+        self.angle = new_angle
+    elseif collision.can_move_to_position(self.id, self.x + 1, self.y - 1, new_angle) == true then
+        self.x = new_x + 1
+        self.y = new_y - 1
+        self.angle = new_angle
+    else
+        -- wiggle objects away from each other to unblock
     end
+
+    self:update_corner_coordinates()
+    self:fix_radians_bounds("angle")
 end
 
 function object.adjust_size(self, new_size_modifier)
@@ -251,40 +227,6 @@ function object.update_corner_coordinates(self)
             self.height / 2, self.angle)
 end
 
-function object.stats_to_corner_coordinates(obj_x, obj_y, obj_width, obj_height, obj_angle)
-
-    if obj_x == nil then error("Expected x of rectangle to convert, got nil.") end
-    if obj_y == nil then error("Expected y of rectangle to convert, got nil.") end
-    if obj_width == nil then error("Expected width of rectangle to convert, got nil.") end
-    if obj_height == nil then error("Expected height of rectangle to convert, got nil.") end
-    if obj_angle == nil then error("Expected angle of rectangle to convert, got nil.") end
-
-    return_values = {}
-
-    return_values["topleft"] = {
-        x = obj_x + collision.rotate_x_coord(-obj_width / 2, -obj_height / 2, obj_angle),
-        y = obj_y + collision.rotate_y_coord(-obj_width / 2, -obj_height / 2, obj_angle)
-    }
-
-    return_values["topright"] = {
-        x = obj_x + collision.rotate_x_coord(obj_width / 2, -obj_height / 2, obj_angle),
-        y = obj_y + collision.rotate_y_coord(obj_width / 2, -obj_height / 2, obj_angle)
-    }
-
-    return_values["bottomright"] = {
-        x = obj_x + collision.rotate_x_coord(obj_width / 2, obj_height / 2, obj_angle),
-        y = obj_y + collision.rotate_y_coord(obj_width / 2, obj_height / 2, obj_angle)
-    }
-
-    return_values["bottomleft"] = {
-        x = obj_x + collision.rotate_x_coord(-obj_width / 2, obj_height / 2, obj_angle),
-        y = obj_y + collision.rotate_y_coord(-obj_width / 2, obj_height / 2, obj_angle)
-    }
-
-    return return_values
-
-end
-
 function object:new(o)
 
     o = o or {}
@@ -312,7 +254,7 @@ function object:newtank(x, y)
     o.max_speed = 5
     o.max_reverse_speed = 0.35
     o.accel_speed = 2
-    o.velocity_loss_pct = 0.01
+    o.velocity_loss_pct = 0.03
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
@@ -338,7 +280,8 @@ function object:newbuggy(x, y)
     o.max_speed = 10
     o.max_reverse_speed = 1.6
     o.accel_speed = 1.5
-    o.velocity_loss_pct = 0.01
+    o.velocity_loss_pct = 0.008
+    o.rotation_velocity_loss_pct = 0.005
     o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
