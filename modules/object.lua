@@ -13,7 +13,7 @@ object = {
     bottomright_x = nil,
     bottomright_y = nil,
     width = 10,
-    height = 10, -- 156 at size_modifier = 1, will be downsized in new()
+    height = 10,                            -- 156 at size_modifier = 1, will be downsized in new()
     weight = 50,
     x_velocity = 0,
     y_velocity = 0,
@@ -22,12 +22,9 @@ object = {
     weapon_angle = nil,
     weapon_y_offset = 0,
     accel_speed = 0.05,
-    velocity_loss_pct = 0.005,
-    rotation_velocity_loss_pct = 0.005,
-    reverse_accel_speed = 0.125,
-    rotation_speed = 1.75,
-    size_modifier = 1,
-    loops_since_collision = 9999
+    velocity_loss_pct = 0.005,              -- friction param that also controls your maximum speed
+    rotation_velocity_loss_pct = 0.005,     -- friction param that also controls your maximum rotation speed
+    size_modifier = 1
 }
 
 local latest_id = 0
@@ -49,8 +46,7 @@ end
 
 function object.rotate_left(self, elapsed)
     
-    self.rotation_velocity = self.rotation_velocity - (self.rotation_speed * elapsed)
-    -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle - increment end
+    self.rotation_velocity = self.rotation_velocity - elapsed
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
@@ -59,8 +55,7 @@ end
 
 function object.rotate_right(self, elapsed)
 
-    self.rotation_velocity = self.rotation_velocity + (self.rotation_speed * elapsed)
-    -- if self['weapon_angle'] ~= nil then self.weapon_angle = self.weapon_angle + increment end
+    self.rotation_velocity = self.rotation_velocity + elapsed
 
     self:fix_radians_bounds('angle')
     self:fix_radians_bounds('weapon_angle')
@@ -69,9 +64,7 @@ end
 
 function object.rotate_weapon_left(self, elapsed)
 
-    local increment = self.rotation_speed * elapsed
-
-    self.weapon_angle = self.weapon_angle - increment
+    self.weapon_angle = self.weapon_angle - elapsed
 
     self:fix_radians_bounds('weapon_angle')
 
@@ -79,9 +72,7 @@ end
 
 function object.rotate_weapon_right(self, elapsed)
 
-    local increment = self.rotation_speed * elapsed
-
-    self.weapon_angle = self.weapon_angle + increment
+    self.weapon_angle = self.weapon_angle + elapsed
 
     self:fix_radians_bounds('weapon_angle')
 
@@ -125,18 +116,6 @@ function object.decelerate(self, elapsed)
         self.y_velocity = 0
     else
         self.y_velocity = self.y_velocity * (1 - (self.velocity_loss_pct))
-    end
-
-end
-
-function object.reduce_rotation_velocity(self, elapsed)
-
-    if self.rotation_velocity > 0 then
-        self.rotation_velocity = math.max(
-            self.rotation_velocity - (self.rotation_speed * 2 * elapsed), 0)
-    else
-        self.rotation_velocity = math.min(
-            self.rotation_velocity + (self.rotation_speed * 2 * elapsed), 0)
     end
 
 end
@@ -258,7 +237,6 @@ function object:newtank(x, y)
     o.reverse_accel_speed = 0.4
     o.weapon_angle = 0.3
     o.size_modifier = 0.25
-    o.rotation_speed = 0.01
     o.weapon_y_offset = 2
 
     o.weight = 500
@@ -285,7 +263,6 @@ function object:newbuggy(x, y)
     o.reverse_accel_speed = 1
     o.weapon_angle = 0.3
     o.size_modifier = 0.04
-    o.rotation_speed = 0.03
     o.weapon_y_offset = 8
 
     o.weight = 20
@@ -319,7 +296,6 @@ function object:newwall(x, y)
     o:update_corner_coordinates()
 
     return o
-
 end
 
 local tree_images = {

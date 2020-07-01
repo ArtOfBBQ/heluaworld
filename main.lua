@@ -180,16 +180,13 @@ function love.update(dt)
 
     -- decelerate naturally and update all object coordinates
     for i = 1, #gameobjects, 1 do
-
         if gameobjects[i].max_speed ~= 0 then
             gameobjects[i]:decelerate(elapsed)
             gameobjects[i]:update_corner_coordinates()
             gameobjects[i]:update_position(map.width, map.height)
             -- gameobjects[i]:push_and_rotate()
             driver.drive(gameobjects[i])
-
         end
-
     end
 
     if math.random(1, 5) == 5 then

@@ -134,86 +134,17 @@ function collision.are_rotated_object_corners_colliding(i, j)
 
 end
 
--- Please call this function whenever a collision has been detected between
+-- Called whenever a collision has been detected between
 -- gameobjects of index i and j
--- this function should change the velocities of the objects
 function collision.register_collision(i, j)
-
-    -- I can't figure out how to do elastic collision by myself,
-    -- so I'm copying this C++ code line by line from Javidx9's public 'balls' repository
-
-    -- // Distance between balls
-    -- float fDistance = sqrtf((b1->px - b2->px)*(b1->px - b2->px) + (b1->py - b2->py)*(b1->py - b2->py));
-    -- local dist_objects = math.sqrt(
-    --     ((gameobjects[i].x - gameobjects[j].x)^2) +
-    --     ((gameobjects[i].y - gameobjects[j].y)^2) )
-
-    -- -- // Normal
-    -- -- float nx = (b2->px - b1->px) / fDistance;
-    -- -- float ny = (b2->py - b1->py) / fDistance;
-    -- local nx = (gameobjects[j].x - gameobjects[i].x) / dist_objects
-    -- local ny = (gameobjects[j].y - gameobjects[i].y) / dist_objects
-    -- if nx < 0.2 then
-    --     nx = 0.2
-    --     ny = 0.8
-    -- elseif ny < 0.2 then
-    --     nx = 0.8
-    --     ny = 0.2
-    -- end
-
-    -- -- // Tangent
-    -- -- float tx = -ny;
-    -- -- float ty = nx;
-    -- local tx = -ny
-    -- local ty = nx
-
-    -- -- // Dot Product Tangent
-    -- -- float dpTan1 = b1->vx * tx + b1->vy * ty;
-    -- -- float dpTan2 = b2->vx * tx + b2->vy * ty;
-    -- local dpTan1 = (gameobjects[i].x_velocity * tx) +
-    --                    (gameobjects[i].y_velocity * ty)
-    -- local dpTan2 = (gameobjects[j].x_velocity * tx) +
-    --                    (gameobjects[j].y_velocity * ty)
-
-    -- -- // Dot Product Normal
-    -- -- float dpNorm1 = b1->vx * nx + b1->vy * ny;
-    -- -- float dpNorm2 = b2->vx * nx + b2->vy * ny;
-    -- local dpNorm1 = (gameobjects[i].x_velocity * nx) +
-    --                     (gameobjects[i].y_velocity * ny)
-    -- local dpNorm2 = (gameobjects[j].x_velocity * nx) +
-    --                     (gameobjects[j].y_velocity * ny)
-
-    -- -- // Conservation of momentum in 1D
-    -- -- float m1 = (dpNorm1 * (b1->mass - b2->mass) + 2.0f * b2->mass * dpNorm2) / (b1->mass + b2->mass);
-    -- -- float m2 = (dpNorm2 * (b2->mass - b1->mass) + 2.0f * b1->mass * dpNorm1) / (b1->mass + b2->mass);
-    -- local m1 =
-    --     ((dpNorm1 * (gameobjects[i].weight - gameobjects[j].weight)) + 2 *
-    --         gameobjects[j].weight * dpNorm2) /
-    --         (gameobjects[i].weight + gameobjects[j].weight)
-    -- local m2 =
-    --     ((dpNorm2 * (gameobjects[j].weight - gameobjects[i].weight)) + 2 *
-    --         gameobjects[i].weight * dpNorm1) /
-    --         (gameobjects[i].weight + gameobjects[j].weight)
-
-    -- -- // Update ball velocities
-    -- -- b1->vx = tx * dpTan1 + nx * m1;
-    -- -- b1->vy = ty * dpTan1 + ny * m1;
-    -- -- b2->vx = tx * dpTan2 + nx * m2;
-    -- -- b2->vy = ty * dpTan2 + ny * m2;
-    -- gameobjects[i].x_velocity = (tx * dpTan1 + nx * m1) * 0.95
-    -- gameobjects[i].y_velocity = (ty * dpTan1 + ny * m1) * 0.95
-    -- gameobjects[j].x_velocity = (tx * dpTan2 + nx * m2) * 0.95
-    -- gameobjects[j].y_velocity = (ty * dpTan2 + ny * m2) * 0.95
 
     gameobjects[i].x_velocity = gameobjects[i].x_velocity * -0.35
     gameobjects[i].y_velocity = gameobjects[i].y_velocity * -0.35
     gameobjects[j].x_velocity = gameobjects[i].x_velocity * -0.35
     gameobjects[j].y_velocity = gameobjects[i].y_velocity * -0.35
 
-    -- I have no idea how the objects are supposed to rotate,
-    -- after colliding, but this feels better than nothing
     if math.abs(gameobjects[i].rotation_velocity) > 0 then gameobjects[i].rotation_velocity = gameobjects[i].rotation_velocity * -0.75 end
-    if math.abs(gameobjects[j].rotation_velocity) > 0 then gameobjects[j].rotation_velocity = gameobjects[j].rotation_velocity * -0.75 end
+    if math.abs(gameobjects[j].rotation_velocity) > 0 then gameobjects[j].rotation_velocity = gameobjects[j].rotation_velocity * -0.75 end    
 end
 
 function collision.stats_to_corner_coordinates(obj_x, obj_y, obj_width, obj_height, obj_angle)
